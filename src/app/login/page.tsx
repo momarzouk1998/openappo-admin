@@ -59,7 +59,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-right"
-              placeholder="01008977105"
+              placeholder="01234567890"
               required
               dir="ltr"
             />
