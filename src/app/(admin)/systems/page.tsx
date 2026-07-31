@@ -7,9 +7,11 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   let systems: any[] = [];
   try {
-    systems = await prisma.system.findMany({
+    const rawSystems = await prisma.system.findMany({
       orderBy: { createdAt: 'asc' }
     });
+    // Serialize Dates and Prisma objects to plain JSON
+    systems = JSON.parse(JSON.stringify(rawSystems));
   } catch (error) {
     console.error("Failed to load systems from database:", error);
   }
