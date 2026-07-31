@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ 
         active: false,
         status: "expired",
-        message: "لقد انتهت صلاحية اشتراك هذا النظام. يرجى تجديد الاشتراك للتمكن من الدخول." 
+        message: "لقد انتهت صلاحية اشتراك هذا النظام بالكامل. يرجى تحويل قيمة الاشتراك على المحفظة الإلكترونية أو إنستاباي للرقم 01558282760 للتجديد." 
       });
     }
 
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
         active: true,
         status: "grace_period",
         graceDaysLeft,
-        message: `لقد انتهت فترة الاشتراك الأساسية. النظام يعمل الآن في فترة السماح ويتبقى ${graceDaysLeft} يوم قبل التوقف التام.`
+        message: `انتهت فترة الاشتراك الأساسية ويتبقى ${graceDaysLeft} يوم في فترة السماح. يرجى تحويل قيمة الاشتراك للرقم 01558282760 لتجنب الإيقاف.`
       });
     }
 
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
         active: true,
         status: "expiring_soon",
         daysLeft,
-        message: `تنبيه: سينتهي اشتراك هذا النظام بعد ${daysLeft} يوم. يرجى المبادرة بالتجديد لضمان استمرار الخدمة.`
+        message: `تنبيه: سينتهي الاشتراك بعد ${daysLeft} يوم. يرجى المبادرة بتجديد الاشتراك عبر التحويل للرقم 01558282760.`
       });
     }
 
