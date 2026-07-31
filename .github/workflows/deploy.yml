@@ -42,5 +42,8 @@ jobs:
               --env-file /opt/openappo-admin/.env \
               ghcr.io/${{ env.IMAGE_NAME }}:latest
               
+            echo "Running database migrations..."
+            docker exec openappo-admin npx prisma db push --accept-data-loss
+            
             echo "Cleaning up old images..."
             docker image prune -f
