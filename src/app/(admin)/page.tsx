@@ -3,7 +3,12 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
-  const systems = await prisma.system.findMany();
+  let systems: any[] = [];
+  try {
+    systems = await prisma.system.findMany();
+  } catch (error) {
+    console.error("Failed to fetch systems in StatsPage:", error);
+  }
   
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
