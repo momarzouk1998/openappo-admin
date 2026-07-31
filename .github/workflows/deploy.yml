@@ -1,0 +1,73 @@
+name: Deploy Admin Dashboard
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Logging in to GitHub Container Registry..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            echo "Pulling the latest image..."
+            docker pull ghcr.io/${{ env.IMAGE_NAME }}:main
+            
+            echo "Stopping and removing the old container..."
+            docker stop openappo-admin || true
+            docker rm openappo-admin || true
+            
+            echo "Running the new container..."
+            docker run -d \
+              --name openappo-admin \
+              --restart unless-stopped \
+              -p 3010:3010 \
+              -v /opt/openappo-admin/data:/app/data \
+              --env-file /opt/openappo-admin/.env \
+              ghcr.io/${{ env.IMAGE_NAME }}:main
+              
+            echo "Cleaning up old images..."
+            docker image prune -f
