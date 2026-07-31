@@ -5,20 +5,34 @@ export const dynamic = "force-dynamic";
 export default async function StatsPage() {
   const systems = await prisma.system.findMany();
   
-  const totalSystems = systems.length;
-  const activeSystems = systems.filter(s => s.isActive).length;
-  const inactiveSystems = totalSystems - activeSystems;
-  
-  const totalMonthlyRevenue = systems
-    .filter(s => s.isActive)
-    .reduce((sum, s) => sum + (s.monthlyFee || 0), 0);
-
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  
-  const expiringSoon = systems.filter(s => {
-    const expiry = new Date(s.subscriptionEndDate);
-    return s.isActive && expiry > now && expiry <= thirtyDaysFromNow;
+
+  const totalSystems = systems.length;
+  let activeSystems = 0;
+  let inactiveSystems = 0;
+  let totalMonthlyRevenue = 0;
+  const expiringSoon: typeof systems = [];
+
+  systems.forEach((s) => {
+    const expiryDate = new Date(s.subscriptionEndDate);
+    const gracePeriodMs = (s.gracePeriodDays || 0) * 24 * 60 * 60 * 1000;
+    const finalDate = new Date(expiryDate.getTime() + gracePeriodMs);
+    
+    // System is active if manually toggled ON and hasn't passed its final grace date
+    const isActuallyActive = s.isActive && now <= finalDate;
+
+    if (isActuallyActive) {
+      activeSystems++;
+      totalMonthlyRevenue += (s.monthlyFee || 0);
+      
+      // If it's active but expires within 30 days (even if it's in grace period)
+      if (expiryDate <= thirtyDaysFromNow) {
+        expiringSoon.push(s);
+      }
+    } else {
+      inactiveSystems++;
+    }
   });
 
   return (
