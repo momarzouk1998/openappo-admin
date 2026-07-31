@@ -5,9 +5,14 @@ import Dashboard from "@/components/Dashboard";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const systems = await prisma.system.findMany({
-    orderBy: { createdAt: 'asc' }
-  });
+  let systems = [];
+  try {
+    systems = await prisma.system.findMany({
+      orderBy: { createdAt: 'asc' }
+    });
+  } catch (error) {
+    console.error("Failed to load systems from database:", error);
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
