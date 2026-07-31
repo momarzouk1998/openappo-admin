@@ -32,16 +32,20 @@ export async function GET(req: NextRequest) {
     const gracePeriodMs = system.gracePeriodDays * 24 * 60 * 60 * 1000;
     const finalDate = new Date(expiryDate.getTime() + gracePeriodMs);
 
-    // Calculate time differences in days
-    const msInDay = 24 * 60 * 60 * 1000;
+    // Strip time for accurate calendar day calculations (UTC midnight)
+    const nowStr = now.toISOString().split('T')[0];
+    const expStr = expiryDate.toISOString().split('T')[0];
+    const finStr = finalDate.toISOString().split('T')[0];
     
-    // Total days until normal expiration
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / msInDay);
-    
-    // Total days until absolute block (end of grace period)
-    const graceDaysLeft = Math.ceil((finalDate.getTime() - now.getTime()) / msInDay);
+    const todayMidnight = new Date(nowStr).getTime();
+    const expMidnight = new Date(expStr).getTime();
+    const finMidnight = new Date(finStr).getTime();
 
-    if (now > finalDate) {
+    const msInDay = 24 * 60 * 60 * 1000;
+    const daysLeft = Math.round((expMidnight - todayMidnight) / msInDay);
+    const graceDaysLeft = Math.round((finMidnight - todayMidnight) / msInDay);
+
+    if (todayMidnight > finMidnight) {
       return NextResponse.json({ 
         active: false,
         status: "expired",
@@ -49,8 +53,8 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Grace Period Phase (Normal Expiration passed, but still within grace days)
-    if (now > expiryDate && now <= finalDate) {
+    // Grace Period Phase (today is strictly after normal expiration day, but <= final day)
+    if (todayMidnight > expMidnight && todayMidnight <= finMidnight) {
       return NextResponse.json({ 
         active: true,
         status: "grace_period",
@@ -59,14 +63,14 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Warning Phase (based on system.warningDays)
+    // Warning Phase (expires today or within warningDaysThreshold)
     const warningDaysThreshold = system.warningDays || 3;
-    if (daysLeft > 0 && daysLeft <= warningDaysThreshold) {
+    if (daysLeft >= 0 && daysLeft <= warningDaysThreshold) {
       return NextResponse.json({ 
         active: true,
         status: "expiring_soon",
         daysLeft,
-        message: `تنبيه: سينتهي الاشتراك بعد ${daysLeft} يوم. يرجى المبادرة بتجديد الاشتراك عبر التحويل للرقم 01558282760.`
+        message: `تنبيه: سينتهي الاشتراك ${daysLeft === 0 ? 'اليوم' : 'بعد ' + daysLeft + ' يوم'}. يرجى المبادرة بتجديد الاشتراك عبر التحويل للرقم 01558282760.`
       });
     }
 
