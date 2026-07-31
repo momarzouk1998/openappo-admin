@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ 
         active: false,
         status: "expired",
-        message: "لقد انتهت صلاحية اشتراك هذا النظام بالكامل. يرجى تحويل قيمة الاشتراك على المحفظة الإلكترونية أو إنستاباي للرقم 01558282760 للتجديد." 
+        message: "مرحباً يا فندم 👋، نعتذر لإيقاف النظام نظراً لانتهاء فترة السماح للاشتراك. برجاء تحويل قيمة التجديد للرقم 01558282760 (محفظة أو إنستاباي) وسيعود للعمل فوراً 🚀🤍" 
       });
     }
 
@@ -59,18 +59,19 @@ export async function GET(req: NextRequest) {
         active: true,
         status: "grace_period",
         graceDaysLeft,
-        message: `انتهت فترة الاشتراك الأساسية ويتبقى ${graceDaysLeft} يوم في فترة السماح. يرجى تحويل قيمة الاشتراك للرقم 01558282760 لتجنب الإيقاف.`
+        message: `عذراً يا فندم 🥺، انتهت فترة الاشتراك الأساسية ويتبقى ${graceDaysLeft} يوم في فترة السماح. يرجى تجديد الاشتراك عبر (محفظة أو إنستاباي) للرقم 01558282760 لتجنب توقف النظام 🔄🙏`
       });
     }
 
     // Warning Phase (expires today or within warningDaysThreshold)
     const warningDaysThreshold = system.warningDays || 3;
     if (daysLeft >= 0 && daysLeft <= warningDaysThreshold) {
+      const formattedDate = new Date(expStr).toLocaleDateString("ar-EG");
       return NextResponse.json({ 
         active: true,
         status: "expiring_soon",
         daysLeft,
-        message: `تنبيه: سينتهي الاشتراك ${daysLeft === 0 ? 'اليوم' : 'بعد ' + daysLeft + ' يوم'}. يرجى المبادرة بتجديد الاشتراك عبر التحويل للرقم 01558282760.`
+        message: `مقدرين وقتك وانشغالك جداً يا فندم 🤍، بنفكرك بموعد تجديد الاشتراك الشهري (سينتهي ${daysLeft === 0 ? 'اليوم' : 'بتاريخ ' + formattedDate}). يمكنك التحويل على الرقم 01558282760 (محفظة أو إنستاباي) 💳✨`
       });
     }
 
