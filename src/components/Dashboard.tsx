@@ -10,6 +10,7 @@ type System = {
   monthlyFee: number;
   subscriptionEndDate: Date;
   gracePeriodDays: number;
+  warningDays: number;
   isActive: boolean;
 };
 
@@ -24,6 +25,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
   const [monthlyFee, setMonthlyFee] = useState(0);
   const [subscriptionEndDate, setSubscriptionEndDate] = useState("");
   const [gracePeriodDays, setGracePeriodDays] = useState(0);
+  const [warningDays, setWarningDays] = useState(3);
 
   const openAddModal = () => {
     setEditingSystem(null);
@@ -32,6 +34,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
     setMonthlyFee(0);
     setSubscriptionEndDate(new Date().toISOString().split("T")[0]);
     setGracePeriodDays(3);
+    setWarningDays(3);
     setModalOpen(true);
   };
 
@@ -42,6 +45,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
     setMonthlyFee(sys.monthlyFee);
     setSubscriptionEndDate(new Date(sys.subscriptionEndDate).toISOString().split("T")[0]);
     setGracePeriodDays(sys.gracePeriodDays);
+    setWarningDays(sys.warningDays || 3);
     setModalOpen(true);
   };
 
@@ -53,6 +57,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
         monthlyFee,
         subscriptionEndDate,
         gracePeriodDays,
+        warningDays,
       });
     } else {
       await addSystem({
@@ -61,6 +66,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
         monthlyFee,
         subscriptionEndDate,
         gracePeriodDays,
+        warningDays,
       });
     }
     setModalOpen(false);
@@ -114,6 +120,10 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">فترة السماح:</span>
                   <span className="font-semibold text-gray-900">{sys.gracePeriodDays} أيام</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">أيام التنبيه المبكر:</span>
+                  <span className="font-semibold text-gray-900">{sys.warningDays} أيام</span>
                 </div>
               </div>
 
@@ -171,6 +181,11 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">فترة السماح (بالأيام)</label>
                 <input required type="number" value={gracePeriodDays} onChange={e => setGracePeriodDays(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">تنبيه قبل الانتهاء بـ (بالأيام)</label>
+                <input required type="number" value={warningDays} onChange={e => setWarningDays(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
               </div>
 
               <div className="flex gap-3 pt-4">

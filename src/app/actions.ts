@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function addSystem(data: { name: string; displayName: string; monthlyFee: number; subscriptionEndDate: string; gracePeriodDays: number }) {
+export async function addSystem(data: { name: string; displayName: string; monthlyFee: number; subscriptionEndDate: string; gracePeriodDays: number; warningDays: number }) {
   await prisma.system.create({
     data: {
       name: data.name,
@@ -11,12 +11,13 @@ export async function addSystem(data: { name: string; displayName: string; month
       monthlyFee: data.monthlyFee,
       subscriptionEndDate: new Date(data.subscriptionEndDate),
       gracePeriodDays: data.gracePeriodDays,
+      warningDays: data.warningDays,
     }
   });
   revalidatePath("/");
 }
 
-export async function updateSystem(id: string, data: { displayName: string; monthlyFee: number; subscriptionEndDate: string; gracePeriodDays: number }) {
+export async function updateSystem(id: string, data: { displayName: string; monthlyFee: number; subscriptionEndDate: string; gracePeriodDays: number; warningDays: number }) {
   await prisma.system.update({
     where: { id },
     data: {
@@ -24,6 +25,7 @@ export async function updateSystem(id: string, data: { displayName: string; mont
       monthlyFee: data.monthlyFee,
       subscriptionEndDate: new Date(data.subscriptionEndDate),
       gracePeriodDays: data.gracePeriodDays,
+      warningDays: data.warningDays,
     }
   });
   revalidatePath("/");

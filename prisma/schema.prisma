@@ -18,6 +18,7 @@ model System {
   monthlyFee          Float    @default(0)
   subscriptionEndDate DateTime
   gracePeriodDays     Int      @default(0)
+  warningDays         Int      @default(3)
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

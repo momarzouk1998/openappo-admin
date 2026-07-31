@@ -59,8 +59,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Warning Phase (3 days or less until normal expiration)
-    if (daysLeft > 0 && daysLeft <= 3) {
+    // Warning Phase (based on system.warningDays)
+    const warningDaysThreshold = system.warningDays || 3;
+    if (daysLeft > 0 && daysLeft <= warningDaysThreshold) {
       return NextResponse.json({ 
         active: true,
         status: "expiring_soon",
