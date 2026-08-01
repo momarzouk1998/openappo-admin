@@ -33,6 +33,10 @@ jobs:
             docker stop openappo-admin || true
             docker rm openappo-admin || true
             
+            echo "Ensuring volume folder exists with write permissions..."
+            mkdir -p /opt/openappo-admin/data
+            chmod 777 /opt/openappo-admin/data
+            
             echo "Running the new container..."
             docker run -d \
               --name openappo-admin \
