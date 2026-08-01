@@ -45,5 +45,5 @@ EXPOSE 3010
 ENV PORT=3010
 ENV HOSTNAME="0.0.0.0"
 
-# Run db push automatically on startup before starting server
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server.js"]
+# Run Next.js server
+CMD ["node", "server.js"]

@@ -1,10 +1,11 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, ensureDbTables } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
   let systems: any[] = [];
   try {
+    await ensureDbTables();
     systems = await prisma.system.findMany();
     if (systems.length === 0) {
       const defaultSystems = [

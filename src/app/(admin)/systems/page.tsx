@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, ensureDbTables } from "@/lib/prisma";
 import Dashboard from "@/components/Dashboard";
 
 // Force dynamic rendering since data changes frequently
@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   let systems: any[] = [];
   try {
+    await ensureDbTables();
+
     let rawSystems = await prisma.system.findMany({
       orderBy: { createdAt: 'asc' }
     });
