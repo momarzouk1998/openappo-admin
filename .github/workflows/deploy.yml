@@ -42,6 +42,7 @@ jobs:
               --name openappo-admin \
               --restart unless-stopped \
               -p 3010:3010 \
+              -e DATABASE_URL="file:/app/data/prod.db" \
               -v /opt/openappo-admin/data:/app/data \
               --env-file /opt/openappo-admin/.env \
               ghcr.io/${{ env.IMAGE_NAME }}:latest
