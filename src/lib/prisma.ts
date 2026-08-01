@@ -34,6 +34,15 @@ export async function ensureDbTables() {
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Ensure all required columns exist in case the table was created previously without them
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN warningDays INTEGER DEFAULT 3;`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN gracePeriodDays INTEGER DEFAULT 0;`);
+    } catch (_) {}
   } catch (error) {
     console.error("Error ensuring DB tables exist:", error);
   }
