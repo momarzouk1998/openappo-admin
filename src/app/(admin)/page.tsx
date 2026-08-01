@@ -6,6 +6,44 @@ export default async function StatsPage() {
   let systems: any[] = [];
   try {
     systems = await prisma.system.findMany();
+    if (systems.length === 0) {
+      const defaultSystems = [
+        {
+          name: "elnazlawy-system",
+          displayName: "معرض النزلاوي",
+          monthlyFee: 750,
+          subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          gracePeriodDays: 3,
+          warningDays: 3,
+        },
+        {
+          name: "mazaya-system",
+          displayName: "مزايا للأثاث",
+          monthlyFee: 750,
+          subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          gracePeriodDays: 3,
+          warningDays: 3,
+        },
+        {
+          name: "Rtx",
+          displayName: "RTX للتجارة",
+          monthlyFee: 700,
+          subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          gracePeriodDays: 3,
+          warningDays: 3,
+        }
+      ];
+
+      for (const sys of defaultSystems) {
+        await prisma.system.upsert({
+          where: { name: sys.name },
+          update: {},
+          create: sys,
+        });
+      }
+
+      systems = await prisma.system.findMany();
+    }
   } catch (error) {
     console.error("Failed to fetch systems in StatsPage:", error);
   }
