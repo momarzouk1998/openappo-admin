@@ -6,11 +6,14 @@ export const dynamic = "force-dynamic";
 
 export default async function Page() {
   let systems: any[] = [];
+  let dbError: string | null = null;
+
   try {
     await ensureDbTables();
 
     const defaultSystems = [
       {
+        id: "10000000-0000-0000-0000-000000000001",
         name: "elnazlawy-system",
         displayName: "معرض النزلاوي",
         monthlyFee: 750,
@@ -19,6 +22,7 @@ export default async function Page() {
         warningDays: 3,
       },
       {
+        id: "10000000-0000-0000-0000-000000000002",
         name: "mazaya-system",
         displayName: "مزايا للأثاث",
         monthlyFee: 750,
@@ -27,6 +31,7 @@ export default async function Page() {
         warningDays: 3,
       },
       {
+        id: "10000000-0000-0000-0000-000000000003",
         name: "Rtx",
         displayName: "RTX للتجارة",
         monthlyFee: 700,
@@ -50,12 +55,18 @@ export default async function Page() {
 
     // Serialize Dates and Prisma objects to plain JSON
     systems = JSON.parse(JSON.stringify(rawSystems));
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to load systems from database:", error);
+    dbError = error?.message || String(error);
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 p-6">
+      {dbError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 font-mono text-sm">
+          <strong>Database Error:</strong> {dbError}
+        </div>
+      )}
       <Dashboard initialSystems={systems} />
     </main>
   );
