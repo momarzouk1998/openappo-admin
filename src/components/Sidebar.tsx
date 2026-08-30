@@ -12,7 +12,9 @@ export function Sidebar() {
   const links = [
     { href: "/", label: "الإحصائيات", icon: "📊" },
     { href: "/systems", label: "إدارة الأنظمة", icon: "🖥️" },
-    { href: "/settings", label: "إعدادات الحساب", icon: "⚙️" },
+    { href: "/payments",  label: "سجل المدفوعات", icon: "💳" },
+    { href: "/expenses",  label: "المصروفات",      icon: "💸" },
+    { href: "/settings",  label: "إعدادات الحساب", icon: "⚙️" },
   ];
 
   const handleLogout = async () => {

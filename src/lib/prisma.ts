@@ -39,6 +39,20 @@ export async function ensureDbTables() {
       );
     `);
 
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS Payment (
+        id TEXT PRIMARY KEY,
+        systemId TEXT NOT NULL,
+        systemName TEXT NOT NULL DEFAULT '',
+        amount REAL NOT NULL DEFAULT 0,
+        paidAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        note TEXT NOT NULL DEFAULT '',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (systemId) REFERENCES System(id) ON DELETE CASCADE
+      );
+    `);
+
     // Ensure all required columns exist in case the table was created previously without them
     try {
       await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN warningDays INTEGER DEFAULT 3;`);
@@ -47,6 +61,27 @@ export async function ensureDbTables() {
     try {
       await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN gracePeriodDays INTEGER DEFAULT 0;`);
     } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Payment ADD COLUMN note TEXT NOT NULL DEFAULT '';`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Payment ADD COLUMN systemName TEXT NOT NULL DEFAULT '';`);
+    } catch (_) {}
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS Expense (
+        id TEXT PRIMARY KEY,
+        category TEXT NOT NULL DEFAULT 'other',
+        label TEXT NOT NULL DEFAULT '',
+        amount REAL NOT NULL DEFAULT 0,
+        paidAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        note TEXT NOT NULL DEFAULT '',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
   } catch (error) {
     console.error("Error ensuring DB tables exist:", error);
   }

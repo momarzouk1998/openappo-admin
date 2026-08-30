@@ -26,6 +26,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
   const [subscriptionEndDate, setSubscriptionEndDate] = useState("");
   const [gracePeriodDays, setGracePeriodDays] = useState(0);
   const [warningDays, setWarningDays] = useState(3);
+  const [recordPayment, setRecordPayment] = useState(true);
 
   const openAddModal = () => {
     setEditingSystem(null);
@@ -35,6 +36,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
     setSubscriptionEndDate(new Date().toISOString().split("T")[0]);
     setGracePeriodDays(3);
     setWarningDays(3);
+    setRecordPayment(false); // new system — no payment to record yet
     setModalOpen(true);
   };
 
@@ -46,6 +48,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
     setSubscriptionEndDate(new Date(sys.subscriptionEndDate).toISOString().split("T")[0]);
     setGracePeriodDays(sys.gracePeriodDays);
     setWarningDays(sys.warningDays || 3);
+    setRecordPayment(true); // default: record payment on renewal
     setModalOpen(true);
   };
 
@@ -58,6 +61,7 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
         subscriptionEndDate,
         gracePeriodDays,
         warningDays,
+        recordPayment,
       });
     } else {
       await addSystem({
@@ -187,6 +191,21 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
                 <label className="block text-sm font-medium text-gray-700 mb-1">تنبيه قبل الانتهاء بـ (بالأيام)</label>
                 <input required type="number" value={warningDays} onChange={e => setWarningDays(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
               </div>
+
+              {editingSystem && (
+                <label className="flex items-center gap-3 cursor-pointer select-none p-3 bg-green-50 rounded-lg border border-green-100">
+                  <input
+                    type="checkbox"
+                    checked={recordPayment}
+                    onChange={e => setRecordPayment(e.target.checked)}
+                    className="w-4 h-4 accent-green-600"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-green-800">تسجيل دفعة تلقائياً عند التجديد</span>
+                    <p className="text-xs text-green-600 mt-0.5">سيُضاف مبلغ {monthlyFee} ج.م بتاريخ {subscriptionEndDate} في سجل المدفوعات</p>
+                  </div>
+                </label>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold transition-colors">

@@ -12,22 +12,47 @@ datasource db {
 }
 
 model System {
-  id                  String   @id @default(uuid())
-  name                String   @unique // e.g., 'elnazlawy-system'
-  displayName         String   // e.g., 'معرض النزلاوي'
-  monthlyFee          Float    @default(0)
+  id                  String    @id @default(uuid())
+  name                String    @unique // e.g., 'elnazlawy-system'
+  displayName         String    // e.g., 'معرض النزلاوي'
+  monthlyFee          Float     @default(0)
   subscriptionEndDate DateTime
-  gracePeriodDays     Int      @default(0)
-  warningDays         Int      @default(3)
-  isActive            Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  gracePeriodDays     Int       @default(0)
+  warningDays         Int       @default(3)
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  payments            Payment[]
 }
 
 model Admin {
   id        String   @id @default(uuid())
   username  String   @unique
   password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  systemId    String
+  systemName  String   // denormalized for display even if system deleted
+  amount      Float
+  paidAt      DateTime // the date payment was recorded/collected
+  note        String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  system      System   @relation(fields: [systemId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  category  String   // 'ads' | 'hosting' | 'database' | 'ai' | 'other'
+  label     String   // human-readable description e.g. "Google Ads - سبتمبر"
+  amount    Float
+  paidAt    DateTime // date the expense was incurred
+  note      String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
