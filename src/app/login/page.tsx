@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -41,7 +42,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans dir-rtl">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">لوحة الإدارة</h1>
+          <div className="flex justify-center mb-4">
+            <Image src="/logo.png" alt="OpenAppo Admin" width={180} height={60} className="h-16 w-auto object-contain" />
+          </div>
           <p className="text-gray-500">تسجيل الدخول للنظام المركزي</p>
         </div>
 

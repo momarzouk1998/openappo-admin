@@ -1,0 +1,34 @@
+{
+  "name": "OpenAppo Admin",
+  "short_name": "OpenAppo",
+  "description": "لوحة تحكم إدارة الأنظمة",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "lang": "ar",
+  "dir": "rtl",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "الإحصائيات",
+      "url": "/",
+      "description": "عرض الإحصائيات الرئيسية"
+    },
+    {
+      "name": "إدارة الأنظمة",
+      "url": "/systems",
+      "description": "إدارة الأنظمة المسجلة"
+    }
+  ]
+}

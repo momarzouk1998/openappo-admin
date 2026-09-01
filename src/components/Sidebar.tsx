@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -27,7 +28,7 @@ export function Sidebar() {
     <>
       {/* Mobile Header & Hamburger Menu */}
       <div className="lg:hidden bg-white border-b border-gray-200 flex items-center justify-between p-4 sticky top-0 z-20">
-        <h1 className="text-xl font-bold text-gray-900">OpenAppo Admin</h1>
+        <Image src="/logo.png" alt="OpenAppo Admin" width={120} height={40} className="h-10 w-auto object-contain" />
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
@@ -56,8 +57,8 @@ export function Sidebar() {
           isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-6 border-b border-gray-200 hidden lg:block">
-          <h1 className="text-xl font-bold text-gray-900 text-center">OpenAppo Admin</h1>
+        <div className="p-6 border-b border-gray-200 hidden lg:flex lg:justify-center">
+          <Image src="/logo.png" alt="OpenAppo Admin" width={150} height={50} className="h-12 w-auto object-contain" />
         </div>
         <div className="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
           {links.map((link) => (
