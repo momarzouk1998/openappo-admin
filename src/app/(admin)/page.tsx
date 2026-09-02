@@ -1,4 +1,6 @@
 import { prisma, ensureDbTables } from "@/lib/prisma";
+import { getMonthlyChartData } from "@/app/actions";
+import { AnalyticsCharts } from "@/components/AnalyticsCharts";
 
 export const dynamic = "force-dynamic";
 
@@ -6,6 +8,7 @@ export default async function StatsPage() {
   let systems: any[] = [];
   let currentMonthCollected = 0;
   let currentMonthExpenses  = 0;
+  let monthlyChartData: Awaited<ReturnType<typeof getMonthlyChartData>> = [];
 
   try {
     await ensureDbTables();
@@ -54,6 +57,7 @@ export default async function StatsPage() {
       prisma.payment.findMany({ where: { paidAt: { gte: monthStart, lte: monthEnd } } }),
       prisma.expense.findMany({ where: { paidAt: { gte: monthStart, lte: monthEnd } } }),
     ]);
+    monthlyChartData = await getMonthlyChartData(6);
 
     systems = rawSystems;
     currentMonthCollected = monthPayments.reduce((s, p) => s + p.amount, 0);
@@ -90,8 +94,8 @@ export default async function StatsPage() {
   const netProfit = currentMonthCollected - currentMonthExpenses;
 
   return (
-    <div className="p-6 md:p-8 dir-rtl" dir="rtl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">نظرة عامة 📊</h1>
+    <div className="p-4 sm:p-6 md:p-8 dir-rtl" dir="rtl">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">نظرة عامة 📊</h1>
 
       {/* ── Row 1: Systems counts ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -202,6 +206,13 @@ export default async function StatsPage() {
           </p>
         </div>
       </div>
+
+      {/* ── Charts ──────────────────────────────────────────────────────────── */}
+      <AnalyticsCharts
+        monthly={monthlyChartData}
+        activeSystems={activeSystems}
+        inactiveSystems={inactiveSystems}
+      />
 
       {/* ── Expiring soon table ─────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

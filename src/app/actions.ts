@@ -214,6 +214,38 @@ export async function getSystems() {
   }));
 }
 
+export type MonthlyPoint = {
+  month: string; // "يناير 2026"
+  collected: number;
+  expenses: number;
+};
+
+export async function getMonthlyChartData(months = 6): Promise<MonthlyPoint[]> {
+  const now = new Date();
+  const result: MonthlyPoint[] = [];
+
+  const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو",
+                     "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const start = new Date(d.getFullYear(), d.getMonth(), 1);
+    const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+
+    const [pays, exps] = await Promise.all([
+      prisma.payment.findMany({ where: { paidAt: { gte: start, lte: end } } }),
+      prisma.expense.findMany({ where: { paidAt: { gte: start, lte: end } } }),
+    ]);
+
+    result.push({
+      month: `${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`,
+      collected: pays.reduce((s, p) => s + p.amount, 0),
+      expenses:  exps.reduce((s, e) => s + e.amount, 0),
+    });
+  }
+  return result;
+}
+
 // ─── Expenses ─────────────────────────────────────────────────────────────────
 
 // EXPENSE_CATEGORIES and ExpenseCategory live in @/lib/constants (shared with client)

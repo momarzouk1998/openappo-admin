@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { InstallPWAButton } from "./InstallPWAButton";
+import { PushSubscribeButton } from "./PushSubscribeButton";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -77,7 +79,9 @@ export function Sidebar() {
             </Link>
           ))}
         </div>
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 flex flex-col gap-2">
+          <InstallPWAButton />
+          <PushSubscribeButton />
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 w-full px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-medium"

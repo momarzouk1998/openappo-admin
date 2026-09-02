@@ -83,12 +83,12 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-sans" dir="rtl">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">إدارة الأنظمة</h1>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto font-sans" dir="rtl">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-6 lg:mb-10">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">إدارة الأنظمة</h1>
         <button
           onClick={openAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md transition-all"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold shadow-md transition-all text-sm sm:text-base"
         >
           + إضافة نظام جديد
         </button>
@@ -151,8 +151,8 @@ export default function Dashboard({ initialSystems }: { initialSystems: System[]
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingSystem ? "تعديل النظام" : "إضافة نظام جديد"}

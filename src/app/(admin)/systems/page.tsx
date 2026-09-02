@@ -61,7 +61,7 @@ export default async function Page() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="min-h-screen bg-gray-50">
       {dbError && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 font-mono text-sm">
           <strong>Database Error:</strong> {dbError}

@@ -289,8 +289,8 @@ export default function PaymentsDashboard({
 
       {/* ── Add / Edit Modal ──────────────────────────────────────────────── */}
       {modalMode && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">
                 {modalMode === "add" ? "➕ إضافة دفعة جديدة" : "✏️ تعديل الدفعة"}
@@ -374,8 +374,8 @@ export default function PaymentsDashboard({
 
       {/* ── Delete Confirm Modal ──────────────────────────────────────────── */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm shadow-2xl p-6 text-center">
             <div className="text-4xl mb-3">🗑️</div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">حذف الدفعة؟</h3>
             <p className="text-sm text-gray-500 mb-6">هذا الإجراء لا يمكن التراجع عنه.</p>

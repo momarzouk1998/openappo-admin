@@ -59,10 +59,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 dir-rtl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">إعدادات الحساب ⚙️</h1>
-      
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-lg">
+    <div className="p-4 sm:p-6 lg:p-8 dir-rtl">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">إعدادات الحساب ⚙️</h1>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 max-w-lg">
         <h2 className="text-xl font-bold text-gray-900 mb-6">تغيير كلمة المرور</h2>
         
         {error && (

@@ -82,6 +82,16 @@ export async function ensureDbTables() {
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS PushSubscription (
+        id TEXT PRIMARY KEY,
+        endpoint TEXT UNIQUE NOT NULL,
+        p256dh TEXT NOT NULL,
+        auth TEXT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
   } catch (error) {
     console.error("Error ensuring DB tables exist:", error);
   }
