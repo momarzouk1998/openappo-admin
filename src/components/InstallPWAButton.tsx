@@ -1,136 +1,86 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 
-declare global {
-  interface Window {
-    __pwaPrompt: any;
-  }
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type State = "standalone" | "native" | "ios" | "android" | null;
-
 export function InstallPWAButton() {
-  const [state, setState] = useState<State>(null);
-  const [showGuide, setShowGuide] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
+  const [showIOSHint, setShowIOSHint] = useState(false);
 
   useEffect(() => {
-    // Already installed as PWA
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setState("standalone");
-      return;
-    }
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
 
-    const ua = navigator.userAgent;
-    const isIos    = /iphone|ipad|ipod/i.test(ua);
-    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
-    const isAndroid = /android/i.test(ua);
+    if (isStandalone) { setInstalled(true); return; }
 
-    // iOS Safari → manual guide
-    if (isIos && isSafari) {
-      setState("ios");
-      return;
-    }
-
-    // Check if the event was already captured before React loaded
-    if (window.__pwaPrompt) {
-      setState("native");
-      return;
-    }
-
-    // Android Chrome → listen for late-firing event
-    if (isAndroid) {
-      setState("android"); // show button immediately
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        window.__pwaPrompt = e;
-        setState("native"); // upgrade to native prompt
-      });
-      return;
-    }
-
-    window.addEventListener("beforeinstallprompt", (e) => {
+    const onBeforeInstall = (e: Event) => {
       e.preventDefault();
-      window.__pwaPrompt = e;
-      setState("native");
-    });
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    const onInstalled = () => { setInstalled(true); setDeferredPrompt(null); };
 
-    window.addEventListener("appinstalled", () => setState("standalone"));
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
-  const triggerNative = async () => {
-    if (!window.__pwaPrompt) { setShowGuide(true); return; }
-    await window.__pwaPrompt.prompt();
-    const { outcome } = await window.__pwaPrompt.userChoice;
-    if (outcome === "accepted") setState("standalone");
-    window.__pwaPrompt = null;
-  };
+  const isIOS =
+    typeof window !== 'undefined' &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+    !(window as any).MSStream;
 
-  if (state === null || state === "standalone") return null;
+  async function handleInstall() {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') { setInstalled(true); setDeferredPrompt(null); }
+    } else if (isIOS) {
+      setShowIOSHint(true);
+    }
+  }
+
+  if (installed) return null;
 
   return (
     <>
       <button
-        onClick={state === "ios" || state === "android" ? () => setShowGuide(true) : triggerNative}
-        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium text-sm shadow-sm"
+        onClick={handleInstall}
+        className="w-full py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer border border-blue-400/30"
       >
-        <span className="text-lg">📲</span>
-        <span>تثبيت التطبيق</span>
+        <Download className="w-4 h-4 animate-bounce" />
+        <span>تثبيت البرنامج</span>
       </button>
 
-      {/* Guide overlay */}
-      {showGuide && (
+      {showIOSHint && (
         <div
-          className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center"
-          onClick={() => setShowGuide(false)}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowIOSHint(false)}
         >
           <div
-            className="bg-white rounded-t-2xl p-6 w-full max-w-sm"
+            className="bg-white rounded-3xl p-6 w-full max-w-sm text-right space-y-3 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             dir="rtl"
           >
-            {state === "ios" ? (
-              <>
-                <h3 className="text-lg font-bold text-gray-900 mb-4 text-center">تثبيت على iPhone</h3>
-                <ol className="space-y-4 text-sm text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">1️⃣</span>
-                    <span>اضغط على زر <strong>المشاركة</strong> <span className="text-blue-500 text-base">⎙</span> في أسفل Safari</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">2️⃣</span>
-                    <span>اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong></span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">3️⃣</span>
-                    <span>اضغط <strong>إضافة</strong> ✅</span>
-                  </li>
-                </ol>
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-bold text-gray-900 mb-4 text-center">تثبيت على Android</h3>
-                <ol className="space-y-4 text-sm text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">1️⃣</span>
-                    <span>اضغط على <strong>⋮</strong> (القائمة) في أعلى Chrome</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">2️⃣</span>
-                    <span>اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong></span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0">3️⃣</span>
-                    <span>اضغط <strong>إضافة</strong> ✅</span>
-                  </li>
-                </ol>
-              </>
-            )}
+            <h3 className="font-bold text-base text-gray-900">📱 تثبيت البرنامج على iPhone</h3>
+            <ol className="space-y-2 text-sm text-gray-600 list-decimal pr-4">
+              <li>اضغط على زر <strong>مشاركة (Share) ⎙</strong> أسفل صفحة Safari.</li>
+              <li>اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong>.</li>
+            </ol>
             <button
-              onClick={() => setShowGuide(false)}
-              className="mt-6 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium"
+              onClick={() => setShowIOSHint(false)}
+              className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm"
             >
-              تمام
+              تم
             </button>
           </div>
         </div>
