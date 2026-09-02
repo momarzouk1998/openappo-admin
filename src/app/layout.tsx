@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
-import { PWARegister } from "@/components/PWARegister";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -67,8 +66,25 @@ export default function RootLayout({
         `}} />
       </head>
       <body className="min-h-full flex flex-col font-[var(--font-cairo)]">
-        <PWARegister />
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('OpenAppo PWA SW registered:', registration.scope);
+                    },
+                    function(err) {
+                      console.log('OpenAppo PWA SW registration failed:', err);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

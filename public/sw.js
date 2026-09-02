@@ -1,96 +1,43 @@
-const CACHE_NAME = "openappo-admin-v3";
-
-const STATIC_ASSETS = [
-  "/",
-  "/login",
-  "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
+const CACHE_NAME = 'openappo-pwa-v4';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/manifest.json',
+  '/favicon.ico'
 ];
 
-// ── Install ──────────────────────────────────────────────────────────────────
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
   self.skipWaiting();
 });
 
-// ── Activate ─────────────────────────────────────────────────────────────────
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      )
-    )
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
   );
   self.clients.claim();
 });
 
-// ── Fetch ────────────────────────────────────────────────────────────────────
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  if (request.method !== "GET" || url.pathname.startsWith("/api/")) return;
-
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() =>
-        caches.match(request).then((cached) => cached || caches.match("/login"))
-      )
-    );
-  } else {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            if (response.ok && url.origin === self.location.origin) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            }
-            return response;
-          })
-      )
-    );
-  }
-});
-
-// ── Push Notifications ───────────────────────────────────────────────────────
-self.addEventListener("push", (event) => {
-  let data = { title: "OpenAppo Admin", body: "إشعار جديد", url: "/", icon: "/icon-192.png", badge: "/icon-96.png" };
-  try {
-    if (event.data) data = { ...data, ...event.data.json() };
-  } catch {}
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body:    data.body,
-      icon:    data.icon,
-      badge:   data.badge,
-      dir:     "rtl",
-      lang:    "ar",
-      vibrate: [200, 100, 200],
-      data:    { url: data.url },
-    })
-  );
-});
-
-// ── Notification Click ───────────────────────────────────────────────────────
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  const url = event.notification.data?.url ?? "/";
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
-      for (const client of windowClients) {
-        if (client.url.includes(self.location.origin) && "focus" in client) {
-          client.navigate(url);
-          return client.focus();
-        }
-      }
-      return clients.openWindow(url);
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET' || event.request.url.includes('/api/')) return;
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+      const rootCached = await caches.match('/');
+      if (rootCached) return rootCached;
+      return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
     })
   );
 });
