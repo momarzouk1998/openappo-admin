@@ -38,9 +38,11 @@ export function PushSubscribeButton() {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") return;
 
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          || "BM60FWH1bqwiFuHJ3RQk6yijXl5aPs3EnmLd-Ykd-VwAjd3C_PTKOVFQiI2EjjiAbUyFe8R87NL4DAMYducvAfU";
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+          applicationServerKey: vapidKey,
         });
 
         await fetch("/api/push/subscribe", {

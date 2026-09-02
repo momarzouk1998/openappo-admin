@@ -27,8 +27,22 @@ export const metadata: Metadata = {
     title: "OpenAppo Admin",
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico",    sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
+  openGraph: {
+    title: "OpenAppo Admin",
+    description: "لوحة تحكم إدارة الأنظمة",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    locale: "ar_EG",
+    type: "website",
   },
 };
 
