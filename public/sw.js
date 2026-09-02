@@ -1,12 +1,11 @@
-const CACHE_NAME = "openappo-admin-v2";
+const CACHE_NAME = "openappo-admin-v3";
 
 const STATIC_ASSETS = [
   "/",
   "/login",
   "/manifest.json",
-  "/logo.png",
-  "/icon-192.png",
-  "/icon-512.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
 ];
 
 // ── Install ──────────────────────────────────────────────────────────────────
