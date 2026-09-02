@@ -10,7 +10,13 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/subscription/verify') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon.ico')
+    pathname.startsWith('/icons/') ||
+    pathname.startsWith('/favicon') ||
+    pathname === '/logo.png' ||
+    pathname === '/manifest.json' ||
+    pathname === '/sw.js' ||
+    pathname === '/og-image.png' ||
+    pathname === '/apple-touch-icon.png'
   ) {
     return NextResponse.next();
   }
@@ -28,5 +34,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api/subscription/verify|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api/subscription/verify|_next/static|_next/image|icons/|favicon|logo\\.png|manifest\\.json|sw\\.js|og-image\\.png|apple-touch-icon\\.png).*)'],
 };
