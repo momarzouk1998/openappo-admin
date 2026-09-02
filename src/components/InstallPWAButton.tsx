@@ -20,9 +20,15 @@ export function InstallPWAButton() {
 
     if (isStandalone) { setInstalled(true); return; }
 
+    // Pick up event captured before React mounted (fires early on Android)
+    if ((window as any).__pwaPrompt) {
+      setDeferredPrompt((window as any).__pwaPrompt as BeforeInstallPromptEvent);
+    }
+
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
+      (window as any).__pwaPrompt = e;
     };
     const onInstalled = () => { setInstalled(true); setDeferredPrompt(null); };
 
