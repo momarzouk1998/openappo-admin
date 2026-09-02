@@ -43,7 +43,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Image src="/logo.png" alt="OpenAppo Admin" width={180} height={60} className="h-16 w-auto object-contain" />
+            <Image src="/icons/icon-192.png" alt="OpenAppo Admin" width={80} height={80} className="w-20 h-20 rounded-2xl shadow-lg" priority />
           </div>
           <p className="text-gray-500">تسجيل الدخول للنظام المركزي</p>
         </div>

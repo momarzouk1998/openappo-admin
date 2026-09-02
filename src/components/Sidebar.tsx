@@ -30,7 +30,10 @@ export function Sidebar() {
     <>
       {/* Mobile Header & Hamburger Menu */}
       <div className="lg:hidden bg-white border-b border-gray-200 flex items-center justify-between p-4 sticky top-0 z-20">
-        <Image src="/logo.png" alt="OpenAppo Admin" width={120} height={40} className="h-10 w-auto object-contain" />
+        <div className="flex items-center gap-2">
+          <Image src="/icons/icon-192.png" alt="OpenAppo Admin" width={40} height={40} className="w-10 h-10 rounded-lg" priority />
+          <span className="font-bold text-gray-800">OpenAppo</span>
+        </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
@@ -60,7 +63,10 @@ export function Sidebar() {
         }`}
       >
         <div className="p-6 border-b border-gray-200 hidden lg:flex lg:justify-center">
-          <Image src="/logo.png" alt="OpenAppo Admin" width={150} height={50} className="h-12 w-auto object-contain" />
+          <div className="flex flex-col items-center gap-2">
+            <Image src="/icons/icon-192.png" alt="OpenAppo Admin" width={64} height={64} className="w-16 h-16 rounded-2xl shadow-md" priority />
+            <span className="font-bold text-gray-800 text-lg">OpenAppo Admin</span>
+          </div>
         </div>
         <div className="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
           {links.map((link) => (

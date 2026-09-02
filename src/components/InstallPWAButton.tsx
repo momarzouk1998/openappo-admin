@@ -12,6 +12,7 @@ export function InstallPWAButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [showIOSHint, setShowIOSHint] = useState(false);
+  const [showAndroidHint, setShowAndroidHint] = useState(false);
 
   useEffect(() => {
     const isStandalone =
@@ -52,6 +53,8 @@ export function InstallPWAButton() {
       if (choice.outcome === 'accepted') { setInstalled(true); setDeferredPrompt(null); }
     } else if (isIOS) {
       setShowIOSHint(true);
+    } else {
+      setShowAndroidHint(true);
     }
   }
 
@@ -66,6 +69,31 @@ export function InstallPWAButton() {
         <Download className="w-4 h-4 animate-bounce" />
         <span>تثبيت البرنامج</span>
       </button>
+
+      {showAndroidHint && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowAndroidHint(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 w-full max-w-sm text-right space-y-3 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            dir="rtl"
+          >
+            <h3 className="font-bold text-base text-gray-900">📱 تثبيت البرنامج</h3>
+            <ol className="space-y-2 text-sm text-gray-600 list-decimal pr-4">
+              <li>افتح قائمة المتصفح <strong>(⋮)</strong> أعلى الصفحة.</li>
+              <li>اختر <strong>"تثبيت التطبيق"</strong> أو <strong>"إضافة إلى الشاشة الرئيسية"</strong>.</li>
+            </ol>
+            <button
+              onClick={() => setShowAndroidHint(false)}
+              className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm"
+            >
+              تم
+            </button>
+          </div>
+        </div>
+      )}
 
       {showIOSHint && (
         <div
