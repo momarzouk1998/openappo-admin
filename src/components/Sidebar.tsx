@@ -1,24 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { InstallPWAButton } from "./InstallPWAButton";
 import { PushSubscribeButton } from "./PushSubscribeButton";
 
+const ALL_LINKS = [
+  { href: "/", label: "الإحصائيات", icon: "📊" },
+  { href: "/systems", label: "إدارة الأنظمة", icon: "🖥️" },
+  { href: "/payments",  label: "سجل المدفوعات", icon: "💳" },
+  { href: "/expenses",  label: "المصروفات",      icon: "💸" },
+  { href: "/settings",  label: "إعدادات الحساب", icon: "⚙️" },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [links, setLinks] = useState(ALL_LINKS);
 
-  const links = [
-    { href: "/", label: "الإحصائيات", icon: "📊" },
-    { href: "/systems", label: "إدارة الأنظمة", icon: "🖥️" },
-    { href: "/payments",  label: "سجل المدفوعات", icon: "💳" },
-    { href: "/expenses",  label: "المصروفات",      icon: "💸" },
-    { href: "/settings",  label: "إعدادات الحساب", icon: "⚙️" },
-  ];
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.admin?.role === "staff") {
+          const allowed: string[] = data.admin.allowedPages || [];
+          setLinks(ALL_LINKS.filter((l) => allowed.includes(l.href)));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });

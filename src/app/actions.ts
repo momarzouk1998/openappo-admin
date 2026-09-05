@@ -2,8 +2,18 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getCurrentAdmin } from "@/lib/session";
+import bcrypt from "bcryptjs";
 
 // ─── Systems ─────────────────────────────────────────────────────────────────
+
+async function requireOwner() {
+  const admin = await getCurrentAdmin();
+  if (!admin || admin.role !== "owner") {
+    throw new Error("غير مصرح لك بهذا الإجراء");
+  }
+  return admin;
+}
 
 export async function addSystem(data: {
   name: string;
@@ -12,7 +22,10 @@ export async function addSystem(data: {
   subscriptionEndDate: string;
   gracePeriodDays: number;
   warningDays: number;
+  customerPhone?: string;
+  accountantPhone?: string;
 }) {
+  await requireOwner();
   await prisma.system.create({
     data: {
       name: data.name,
@@ -21,10 +34,13 @@ export async function addSystem(data: {
       subscriptionEndDate: new Date(data.subscriptionEndDate),
       gracePeriodDays: data.gracePeriodDays,
       warningDays: data.warningDays,
+      customerPhone: data.customerPhone ?? "",
+      accountantPhone: data.accountantPhone ?? "",
     },
   });
   revalidatePath("/");
   revalidatePath("/payments");
+  revalidatePath("/systems");
 }
 
 export async function updateSystem(
@@ -36,8 +52,11 @@ export async function updateSystem(
     gracePeriodDays: number;
     warningDays: number;
     recordPayment?: boolean; // whether to auto-record a payment for this renewal
+    customerPhone?: string;
+    accountantPhone?: string;
   }
 ) {
+  await requireOwner();
   const existing = await prisma.system.findUnique({ where: { id } });
 
   await prisma.system.update({
@@ -48,6 +67,8 @@ export async function updateSystem(
       subscriptionEndDate: new Date(data.subscriptionEndDate),
       gracePeriodDays: data.gracePeriodDays,
       warningDays: data.warningDays,
+      customerPhone: data.customerPhone ?? "",
+      accountantPhone: data.accountantPhone ?? "",
     },
   });
 
@@ -72,14 +93,55 @@ export async function updateSystem(
 
   revalidatePath("/");
   revalidatePath("/payments");
+  revalidatePath("/systems");
 }
 
 export async function toggleSystemStatus(id: string, isActive: boolean) {
+  await requireOwner();
   await prisma.system.update({
     where: { id },
     data: { isActive },
   });
   revalidatePath("/");
+  revalidatePath("/systems");
+}
+
+// Restricted, safe renewal — usable by staff accounts that can't see pricing.
+// Never accepts a client-supplied fee; always reuses the system's existing
+// monthlyFee for the payment record so a staff user never learns the price.
+export async function renewSystem(
+  id: string,
+  data: { subscriptionEndDate: string; recordPayment?: boolean }
+) {
+  const admin = await getCurrentAdmin();
+  if (!admin) throw new Error("غير مصرح لك بهذا الإجراء");
+
+  const existing = await prisma.system.findUnique({ where: { id } });
+  if (!existing) throw new Error("النظام غير موجود");
+
+  await prisma.system.update({
+    where: { id },
+    data: { subscriptionEndDate: new Date(data.subscriptionEndDate) },
+  });
+
+  if (data.recordPayment) {
+    const oldDate = new Date(existing.subscriptionEndDate).toISOString().split("T")[0];
+    const newDate = new Date(data.subscriptionEndDate).toISOString().split("T")[0];
+    if (oldDate !== newDate) {
+      await prisma.payment.create({
+        data: {
+          systemId: id,
+          systemName: existing.displayName,
+          amount: existing.monthlyFee,
+          paidAt: new Date(data.subscriptionEndDate),
+        },
+      });
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/payments");
+  revalidatePath("/systems");
 }
 
 // ─── Payments ────────────────────────────────────────────────────────────────
@@ -351,4 +413,89 @@ export async function getExpenseStats(): Promise<ExpenseStats> {
     netProfit: currentMonthRevenue - currentMonthTotal,
     currentMonthRevenue,
   };
+}
+
+// ─── Staff Users (owner-only) ─────────────────────────────────────────────────
+
+export type AdminRow = {
+  id: string;
+  username: string;
+  role: "owner" | "staff";
+  allowedPages: string[];
+  canSeePricing: boolean;
+};
+
+export async function getAdmins(): Promise<AdminRow[]> {
+  await requireOwner();
+  const rows = await prisma.admin.findMany({ orderBy: { createdAt: "asc" } });
+  return rows.map((a) => ({
+    id: a.id,
+    username: a.username,
+    role: (a.role as "owner" | "staff") || "owner",
+    allowedPages: (() => {
+      try { return JSON.parse(a.allowedPages || "[]"); } catch { return []; }
+    })(),
+    canSeePricing: a.canSeePricing ?? true,
+  }));
+}
+
+export async function addStaffAdmin(data: {
+  username: string;
+  password: string;
+  allowedPages: string[];
+  canSeePricing: boolean;
+}) {
+  await requireOwner();
+  if (!data.username || !data.password || data.password.length < 6) {
+    throw new Error("اسم المستخدم مطلوب وكلمة المرور 6 أحرف على الأقل");
+  }
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  await prisma.admin.create({
+    data: {
+      username: data.username,
+      password: hashedPassword,
+      role: "staff",
+      allowedPages: JSON.stringify(data.allowedPages),
+      canSeePricing: data.canSeePricing,
+    },
+  });
+  revalidatePath("/settings");
+}
+
+export async function updateAdminPermissions(
+  id: string,
+  data: { allowedPages: string[]; canSeePricing: boolean }
+) {
+  await requireOwner();
+  const target = await prisma.admin.findUnique({ where: { id } });
+  if (!target) throw new Error("المستخدم غير موجود");
+  if (target.role === "owner") throw new Error("لا يمكن تقييد صلاحيات المالك");
+
+  await prisma.admin.update({
+    where: { id },
+    data: {
+      allowedPages: JSON.stringify(data.allowedPages),
+      canSeePricing: data.canSeePricing,
+    },
+  });
+  revalidatePath("/settings");
+}
+
+export async function resetAdminPassword(id: string, newPassword: string) {
+  await requireOwner();
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await prisma.admin.update({ where: { id }, data: { password: hashedPassword } });
+  revalidatePath("/settings");
+}
+
+export async function deleteAdmin(id: string) {
+  await requireOwner();
+  const target = await prisma.admin.findUnique({ where: { id } });
+  if (!target) return;
+  if (target.role === "owner") throw new Error("لا يمكن حذف حساب المالك");
+  await prisma.admin.delete({ where: { id } });
+  revalidatePath("/settings");
 }

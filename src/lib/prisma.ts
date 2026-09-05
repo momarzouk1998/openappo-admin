@@ -34,6 +34,9 @@ export async function ensureDbTables() {
         id TEXT PRIMARY KEY,
         username TEXT UNIQUE,
         password TEXT,
+        role TEXT NOT NULL DEFAULT 'owner',
+        allowedPages TEXT NOT NULL DEFAULT '["/","/systems","/payments","/expenses","/settings"]',
+        canSeePricing BOOLEAN NOT NULL DEFAULT true,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
@@ -60,6 +63,26 @@ export async function ensureDbTables() {
 
     try {
       await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN gracePeriodDays INTEGER DEFAULT 0;`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN customerPhone TEXT NOT NULL DEFAULT '';`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE System ADD COLUMN accountantPhone TEXT NOT NULL DEFAULT '';`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Admin ADD COLUMN role TEXT NOT NULL DEFAULT 'owner';`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Admin ADD COLUMN allowedPages TEXT NOT NULL DEFAULT '["/","/systems","/payments","/expenses","/settings"]';`);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Admin ADD COLUMN canSeePricing BOOLEAN NOT NULL DEFAULT true;`);
     } catch (_) {}
 
     try {

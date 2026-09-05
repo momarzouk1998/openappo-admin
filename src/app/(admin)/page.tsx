@@ -1,10 +1,18 @@
+import { redirect } from "next/navigation";
 import { prisma, ensureDbTables } from "@/lib/prisma";
 import { getMonthlyChartData } from "@/app/actions";
 import { AnalyticsCharts } from "@/components/AnalyticsCharts";
+import { getCurrentAdmin } from "@/lib/session";
+import { firstAllowedPage } from "@/lib/pages";
 
 export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
+  const admin = await getCurrentAdmin();
+  if (admin && admin.role === "staff" && !admin.allowedPages.includes("/")) {
+    redirect(firstAllowedPage(admin.allowedPages));
+  }
+
   let systems: any[] = [];
   let currentMonthCollected = 0;
   let currentMonthExpenses  = 0;

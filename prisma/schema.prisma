@@ -20,17 +20,22 @@ model System {
   gracePeriodDays     Int       @default(0)
   warningDays         Int       @default(3)
   isActive            Boolean   @default(true)
+  customerPhone       String    @default("")
+  accountantPhone     String    @default("")
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   payments            Payment[]
 }
 
 model Admin {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  username      String   @unique
+  password      String
+  role          String   @default("owner") // 'owner' | 'staff'
+  allowedPages  String   @default("[\"/\",\"/systems\",\"/payments\",\"/expenses\",\"/settings\"]") // JSON array, staff only
+  canSeePricing Boolean  @default(true) // staff only — hides monthlyFee everywhere
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Payment {
