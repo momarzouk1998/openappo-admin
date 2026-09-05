@@ -44,6 +44,7 @@ model Payment {
   systemName  String   // denormalized for display even if system deleted
   amount      Float
   paidAt      DateTime // the date payment was recorded/collected
+  type        String   @default("subscription") // 'subscription' | 'setup' (one-time setup fee)
   note        String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

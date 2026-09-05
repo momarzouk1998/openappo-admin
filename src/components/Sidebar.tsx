@@ -12,6 +12,7 @@ const ALL_LINKS = [
   { href: "/systems", label: "إدارة الأنظمة", icon: "🖥️" },
   { href: "/payments",  label: "سجل المدفوعات", icon: "💳" },
   { href: "/expenses",  label: "المصروفات",      icon: "💸" },
+  { href: "/reports",   label: "التقارير",       icon: "📑" },
   { href: "/settings",  label: "إعدادات الحساب", icon: "⚙️" },
 ];
 

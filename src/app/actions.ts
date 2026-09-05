@@ -151,6 +151,7 @@ export async function addPayment(data: {
   amount: number;
   paidAt: string;
   note?: string;
+  type?: "subscription" | "setup";
 }) {
   const system = await prisma.system.findUnique({ where: { id: data.systemId } });
   if (!system) throw new Error("النظام غير موجود");
@@ -161,15 +162,18 @@ export async function addPayment(data: {
       systemName: system.displayName,
       amount: data.amount,
       paidAt: new Date(data.paidAt),
+      type: data.type ?? "subscription",
       note: data.note ?? "",
     },
   });
   revalidatePath("/payments");
+  revalidatePath("/reports");
+  revalidatePath("/");
 }
 
 export async function updatePayment(
   id: string,
-  data: { amount: number; paidAt: string; note?: string }
+  data: { amount: number; paidAt: string; note?: string; type?: "subscription" | "setup" }
 ) {
   await prisma.payment.update({
     where: { id },
@@ -177,10 +181,13 @@ export async function updatePayment(
       amount: data.amount,
       paidAt: new Date(data.paidAt),
       note: data.note ?? "",
+      ...(data.type ? { type: data.type } : {}),
       updatedAt: new Date(),
     },
   });
   revalidatePath("/payments");
+  revalidatePath("/reports");
+  revalidatePath("/");
 }
 
 export async function deletePayment(id: string) {
@@ -196,6 +203,7 @@ export type PaymentRow = {
   systemName: string;
   amount: number;
   paidAt: string; // ISO string
+  type: "subscription" | "setup";
   note: string;
   createdAt: string;
 };
@@ -217,6 +225,7 @@ export async function getPayments(): Promise<PaymentRow[]> {
     systemName: r.systemName,
     amount: r.amount,
     paidAt: r.paidAt.toISOString(),
+    type: (r.type as "subscription" | "setup") || "subscription",
     note: r.note,
     createdAt: r.createdAt.toISOString(),
   }));
@@ -498,4 +507,74 @@ export async function deleteAdmin(id: string) {
   if (target.role === "owner") throw new Error("لا يمكن حذف حساب المالك");
   await prisma.admin.delete({ where: { id } });
   revalidatePath("/settings");
+}
+
+// ─── Financial Reports (date-range) ───────────────────────────────────────────
+
+export type FinancialReport = {
+  from: string; // ISO date
+  to: string;   // ISO date
+  subscriptionTotal: number;
+  setupFeeTotal: number;
+  collectedTotal: number; // subscriptionTotal + setupFeeTotal
+  expensesTotal: number;
+  netProfit: number;
+  paymentCount: number;
+  expenseCount: number;
+  expensesByCategory: { category: string; total: number }[];
+  payments: PaymentRow[];
+};
+
+export async function getFinancialReport(from: string, to: string): Promise<FinancialReport> {
+  const rangeStart = new Date(from + "T00:00:00");
+  const rangeEnd = new Date(to + "T23:59:59.999");
+
+  const [payments, expenses] = await Promise.all([
+    prisma.payment.findMany({
+      where: { paidAt: { gte: rangeStart, lte: rangeEnd } },
+      orderBy: { paidAt: "desc" },
+    }),
+    prisma.expense.findMany({
+      where: { paidAt: { gte: rangeStart, lte: rangeEnd } },
+    }),
+  ]);
+
+  let subscriptionTotal = 0;
+  let setupFeeTotal = 0;
+  for (const p of payments) {
+    if ((p.type || "subscription") === "setup") setupFeeTotal += p.amount;
+    else subscriptionTotal += p.amount;
+  }
+
+  const expensesTotal = expenses.reduce((s, e) => s + e.amount, 0);
+  const collectedTotal = subscriptionTotal + setupFeeTotal;
+
+  const catMap: Record<string, number> = {};
+  for (const e of expenses) {
+    catMap[e.category] = (catMap[e.category] ?? 0) + e.amount;
+  }
+  const expensesByCategory = Object.entries(catMap).map(([category, total]) => ({ category, total }));
+
+  return {
+    from,
+    to,
+    subscriptionTotal,
+    setupFeeTotal,
+    collectedTotal,
+    expensesTotal,
+    netProfit: collectedTotal - expensesTotal,
+    paymentCount: payments.length,
+    expenseCount: expenses.length,
+    expensesByCategory,
+    payments: payments.map((p) => ({
+      id: p.id,
+      systemId: p.systemId,
+      systemName: p.systemName,
+      amount: p.amount,
+      paidAt: p.paidAt.toISOString(),
+      type: (p.type as "subscription" | "setup") || "subscription",
+      note: p.note,
+      createdAt: p.createdAt.toISOString(),
+    })),
+  };
 }

@@ -3,6 +3,7 @@ export const ALL_PAGES = [
   { href: "/systems", label: "إدارة الأنظمة" },
   { href: "/payments", label: "سجل المدفوعات" },
   { href: "/expenses", label: "المصروفات" },
+  { href: "/reports", label: "التقارير" },
   { href: "/settings", label: "إعدادات الحساب" },
 ] as const;
 

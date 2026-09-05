@@ -93,6 +93,10 @@ export async function ensureDbTables() {
       await prisma.$executeRawUnsafe(`ALTER TABLE Payment ADD COLUMN systemName TEXT NOT NULL DEFAULT '';`);
     } catch (_) {}
 
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Payment ADD COLUMN type TEXT NOT NULL DEFAULT 'subscription';`);
+    } catch (_) {}
+
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS Expense (
         id TEXT PRIMARY KEY,
