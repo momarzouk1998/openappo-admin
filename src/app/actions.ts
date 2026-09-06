@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentAdmin } from "@/lib/session";
 import bcrypt from "bcryptjs";
+import { parseInputDate, formatDateToYYYYMMDD } from "@/lib/dates";
 
 // ─── Systems ─────────────────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ export async function addPayment(data: {
       systemId: data.systemId,
       systemName: system.displayName,
       amount: data.amount,
-      paidAt: new Date(data.paidAt),
+      paidAt: parseInputDate(data.paidAt),
       type: data.type ?? "subscription",
       note: data.note ?? "",
     },
@@ -179,7 +180,7 @@ export async function updatePayment(
     where: { id },
     data: {
       amount: data.amount,
-      paidAt: new Date(data.paidAt),
+      paidAt: parseInputDate(data.paidAt),
       note: data.note ?? "",
       ...(data.type ? { type: data.type } : {}),
       updatedAt: new Date(),
@@ -352,11 +353,13 @@ export async function addExpense(data: {
       category: data.category,
       label: data.label,
       amount: data.amount,
-      paidAt: new Date(data.paidAt),
+      paidAt: parseInputDate(data.paidAt),
       note: data.note ?? "",
     },
   });
   revalidatePath("/expenses");
+  revalidatePath("/reports");
+  revalidatePath("/");
 }
 
 export async function updateExpense(
@@ -369,7 +372,7 @@ export async function updateExpense(
       category: data.category,
       label: data.label,
       amount: data.amount,
-      paidAt: new Date(data.paidAt),
+      paidAt: parseInputDate(data.paidAt),
       note: data.note ?? "",
       updatedAt: new Date(),
     },
@@ -526,10 +529,11 @@ export type FinancialReport = {
 };
 
 export async function getFinancialReport(from: string, to: string): Promise<FinancialReport> {
-  const rangeStart = new Date(from + "T00:00:00");
-  const rangeEnd = new Date(to + "T23:59:59.999");
+  // Buffer start by -12h and end by +12h to safely capture records across timezone boundaries
+  const rangeStart = new Date(new Date(`${from}T00:00:00.000Z`).getTime() - 12 * 3600 * 1000);
+  const rangeEnd = new Date(new Date(`${to}T23:59:59.999Z`).getTime() + 12 * 3600 * 1000);
 
-  const [payments, expenses] = await Promise.all([
+  const [rawPayments, rawExpenses] = await Promise.all([
     prisma.payment.findMany({
       where: { paidAt: { gte: rangeStart, lte: rangeEnd } },
       orderBy: { paidAt: "desc" },
@@ -538,6 +542,17 @@ export async function getFinancialReport(from: string, to: string): Promise<Fina
       where: { paidAt: { gte: rangeStart, lte: rangeEnd } },
     }),
   ]);
+
+  // Precise local date string filter: guarantees matching all items that fall within from..to in local time
+  const payments = rawPayments.filter((p) => {
+    const dStr = formatDateToYYYYMMDD(p.paidAt);
+    return dStr >= from && dStr <= to;
+  });
+
+  const expenses = rawExpenses.filter((e) => {
+    const dStr = formatDateToYYYYMMDD(e.paidAt);
+    return dStr >= from && dStr <= to;
+  });
 
   let subscriptionTotal = 0;
   let setupFeeTotal = 0;

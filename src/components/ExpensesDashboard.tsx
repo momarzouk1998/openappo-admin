@@ -10,6 +10,8 @@ import {
 } from "@/app/actions";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 
+import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
+
 type Props = {
   initialExpenses: ExpenseRow[];
   stats: ExpenseStats;
@@ -27,10 +29,6 @@ function formatDate(iso: string) {
     month: "long",
     year: "numeric",
   });
-}
-
-function todayStr() {
-  return new Date().toISOString().split("T")[0];
 }
 
 function categoryMeta(value: string) {
@@ -68,8 +66,9 @@ export default function ExpensesDashboard({
   // ── Derived ───────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return expenses.filter((e) => {
-      const monthOk = filterMonth    ? e.paidAt.startsWith(filterMonth)    : true;
-      const catOk   = filterCategory ? e.category === filterCategory        : true;
+      const localYYYYMM = formatDateToYYYYMMDD(new Date(e.paidAt)).slice(0, 7);
+      const monthOk = filterMonth ? localYYYYMM === filterMonth : true;
+      const catOk   = filterCategory ? e.category === filterCategory : true;
       return monthOk && catOk;
     });
   }, [expenses, filterMonth, filterCategory]);
@@ -81,7 +80,9 @@ export default function ExpensesDashboard({
 
   const monthOptions = useMemo(() => {
     const set = new Set<string>();
-    expenses.forEach((e) => set.add(e.paidAt.slice(0, 7)));
+    expenses.forEach((e) => {
+      set.add(formatDateToYYYYMMDD(new Date(e.paidAt)).slice(0, 7));
+    });
     return Array.from(set).sort().reverse();
   }, [expenses]);
 

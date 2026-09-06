@@ -9,6 +9,8 @@ import {
   type PaymentStats,
 } from "@/app/actions";
 
+import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
+
 type SystemOption = { id: string; displayName: string; monthlyFee: number };
 
 type Props = {
@@ -27,10 +29,6 @@ const MONTHS_AR = [
 function formatDate(iso: string) {
   const d = new Date(iso);
   return d.toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" });
-}
-
-function todayStr() {
-  return new Date().toISOString().split("T")[0];
 }
 
 type ModalMode = "add" | "edit" | null;
@@ -63,9 +61,8 @@ export default function PaymentsDashboard({
   // ── Derived: filtered payments ───────────────────────────────────────────
   const filtered = useMemo(() => {
     return payments.filter((p) => {
-      const monthMatch = filterMonth
-        ? p.paidAt.startsWith(filterMonth)
-        : true;
+      const localYYYYMM = formatDateToYYYYMMDD(new Date(p.paidAt)).slice(0, 7);
+      const monthMatch = filterMonth ? localYYYYMM === filterMonth : true;
       const sysMatch = filterSystem ? p.systemId === filterSystem : true;
       return monthMatch && sysMatch;
     });
@@ -79,7 +76,9 @@ export default function PaymentsDashboard({
   // ── Available months from data ────────────────────────────────────────────
   const monthOptions = useMemo(() => {
     const set = new Set<string>();
-    payments.forEach((p) => set.add(p.paidAt.slice(0, 7)));
+    payments.forEach((p) => {
+      set.add(formatDateToYYYYMMDD(new Date(p.paidAt)).slice(0, 7));
+    });
     return Array.from(set).sort().reverse();
   }, [payments]);
 

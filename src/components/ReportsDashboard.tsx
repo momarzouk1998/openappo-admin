@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { getFinancialReport, type FinancialReport } from "@/app/actions";
 
+import { currentMonthRange } from "@/lib/dates";
+
 const CATEGORY_LABELS: Record<string, string> = {
   ads: "إعلانات",
   hosting: "استضافة",
@@ -10,18 +12,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   ai: "ذكاء اصطناعي",
   other: "أخرى",
 };
-
-function todayStr() {
-  return new Date().toISOString().split("T")[0];
-}
-
-function currentMonthRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const toISO = (d: Date) => d.toISOString().split("T")[0];
-  return { from: toISO(start), to: toISO(end) };
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" });
@@ -40,6 +30,7 @@ export default function ReportsDashboard({
   const [isPending, startTransition] = useTransition();
 
   const runReport = (f: string, t: string) => {
+    if (!f || !t) return;
     startTransition(async () => {
       const r = await getFinancialReport(f, t);
       setReport(r);
@@ -75,7 +66,6 @@ export default function ReportsDashboard({
           <input
             type="date"
             value={from}
-            max={to}
             onChange={(e) => runReport(e.target.value, to)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             dir="ltr"
@@ -87,7 +77,6 @@ export default function ReportsDashboard({
             type="date"
             value={to}
             min={from}
-            max={todayStr()}
             onChange={(e) => runReport(from, e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             dir="ltr"

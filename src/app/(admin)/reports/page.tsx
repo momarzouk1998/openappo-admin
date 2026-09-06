@@ -7,13 +7,7 @@ import ReportsDashboard from "@/components/ReportsDashboard";
 
 export const dynamic = "force-dynamic";
 
-function currentMonthRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const toISO = (d: Date) => d.toISOString().split("T")[0];
-  return { from: toISO(start), to: toISO(end) };
-}
+import { currentMonthRange } from "@/lib/dates";
 
 export default async function ReportsPage() {
   const admin = await getCurrentAdmin();
