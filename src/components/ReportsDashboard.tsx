@@ -132,41 +132,99 @@ export default function ReportsDashboard({
         </div>
       )}
 
-      {/* ── Payments in range ──────────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <h2 className="text-lg font-bold text-gray-900 p-6 pb-0">المدفوعات خلال الفترة</h2>
-        {report.payments.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">لا توجد مدفوعات في هذه الفترة</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">العميل</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">النوع</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">المبلغ</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">التاريخ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {report.payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-5 py-3.5 font-medium text-gray-900">{p.systemName}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        p.type === "setup" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"
-                      }`}>
-                        {p.type === "setup" ? "تأسيس" : "اشتراك"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 font-semibold text-green-700">{p.amount.toLocaleString("ar-EG")} ج.م</td>
-                    <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(p.paidAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* ── Payments & Expenses Tables (Grid / Stack) ────────────────────────── */}
+      <div className="space-y-8">
+        {/* Payments table */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span>💳</span>
+              <span>المدفوعات (الإيرادات) خلال الفترة</span>
+            </h2>
+            <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
+              {report.paymentCount} عملية
+            </span>
           </div>
-        )}
+
+          {report.payments.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">لا توجد مدفوعات في هذه الفترة</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-right">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">العميل</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">النوع</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">المبلغ</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {report.payments.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3.5 font-medium text-gray-900">{p.systemName}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          p.type === "setup" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"
+                        }`}>
+                          {p.type === "setup" ? "تأسيس" : "اشتراك"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold text-green-700">{p.amount.toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(p.paidAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Expenses table */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span>💸</span>
+              <span>المصروفات التفصيلية خلال الفترة</span>
+            </h2>
+            <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
+              {report.expenseCount} عملية
+            </span>
+          </div>
+
+          {!report.expenses || report.expenses.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">لا توجد مصروفات في هذه الفترة</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-right">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">الوصف</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">الفئة</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">المبلغ</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">التاريخ</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">ملاحظة</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {report.expenses.map((e) => (
+                    <tr key={e.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3.5 font-medium text-gray-900">{e.label || "—"}</td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                          {CATEGORY_LABELS[e.category] || e.category}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold text-red-600">{e.amount.toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(e.paidAt)}</td>
+                      <td className="px-5 py-3.5 text-gray-400 text-sm max-w-[200px] truncate">{e.note || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -526,6 +526,7 @@ export type FinancialReport = {
   expenseCount: number;
   expensesByCategory: { category: string; total: number }[];
   payments: PaymentRow[];
+  expenses: ExpenseRow[];
 };
 
 export async function getFinancialReport(from: string, to: string): Promise<FinancialReport> {
@@ -540,6 +541,7 @@ export async function getFinancialReport(from: string, to: string): Promise<Fina
     }),
     prisma.expense.findMany({
       where: { paidAt: { gte: rangeStart, lte: rangeEnd } },
+      orderBy: { paidAt: "desc" },
     }),
   ]);
 
@@ -590,6 +592,15 @@ export async function getFinancialReport(from: string, to: string): Promise<Fina
       type: (p.type as "subscription" | "setup") || "subscription",
       note: p.note,
       createdAt: p.createdAt.toISOString(),
+    })),
+    expenses: expenses.map((e) => ({
+      id: e.id,
+      category: e.category,
+      label: e.label,
+      amount: e.amount,
+      paidAt: e.paidAt.toISOString(),
+      note: e.note,
+      createdAt: e.createdAt.toISOString(),
     })),
   };
 }
