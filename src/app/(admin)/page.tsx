@@ -235,7 +235,7 @@ export default async function StatsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
+            <table className="min-w-full text-right border-collapse">
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="pb-3 font-semibold text-gray-500 text-sm">اسم النظام</th>

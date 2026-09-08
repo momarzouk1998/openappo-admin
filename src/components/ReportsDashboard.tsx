@@ -150,7 +150,7 @@ export default function ReportsDashboard({
             <div className="text-center py-12 text-gray-400">لا توجد مدفوعات في هذه الفترة</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-right">
+              <table className="min-w-full text-right">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">العميل</th>
@@ -196,7 +196,7 @@ export default function ReportsDashboard({
             <div className="text-center py-12 text-gray-400">لا توجد مصروفات في هذه الفترة</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-right">
+              <table className="min-w-full text-right">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     <th className="px-5 py-3.5 text-xs font-semibold text-gray-500">الوصف</th>
