@@ -193,7 +193,7 @@ export default function PaymentsDashboard({
             <ul className="space-y-1 max-h-28 overflow-y-auto">
               {liveStats.nextMonthSystems.map((s) => (
                 <li key={s.id} className="flex justify-between text-sm">
-                  <span className="text-gray-700 truncate">{s.displayName}</span>
+                  <span className="text-gray-700 truncate min-w-0">{s.displayName}</span>
                   <span className="font-semibold text-orange-600 shrink-0 mr-2">{s.monthlyFee.toLocaleString()} ج.م</span>
                 </li>
               ))}
