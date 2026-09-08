@@ -112,7 +112,12 @@ export async function toggleSystemStatus(id: string, isActive: boolean) {
 // monthlyFee for the payment record so a staff user never learns the price.
 export async function renewSystem(
   id: string,
-  data: { subscriptionEndDate: string; recordPayment?: boolean }
+  data: {
+    subscriptionEndDate: string;
+    recordPayment?: boolean;
+    gracePeriodDays?: number;
+    warningDays?: number;
+  }
 ) {
   const admin = await getCurrentAdmin();
   if (!admin) throw new Error("غير مصرح لك بهذا الإجراء");
@@ -122,7 +127,11 @@ export async function renewSystem(
 
   await prisma.system.update({
     where: { id },
-    data: { subscriptionEndDate: new Date(data.subscriptionEndDate) },
+    data: {
+      subscriptionEndDate: new Date(data.subscriptionEndDate),
+      ...(data.gracePeriodDays !== undefined ? { gracePeriodDays: data.gracePeriodDays } : {}),
+      ...(data.warningDays !== undefined ? { warningDays: data.warningDays } : {}),
+    },
   });
 
   if (data.recordPayment) {

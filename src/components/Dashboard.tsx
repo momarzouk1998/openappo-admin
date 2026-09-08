@@ -44,6 +44,8 @@ export default function Dashboard({
   // Renew (staff) form state
   const [renewEndDate, setRenewEndDate] = useState("");
   const [renewRecordPayment, setRenewRecordPayment] = useState(true);
+  const [renewGracePeriodDays, setRenewGracePeriodDays] = useState(3);
+  const [renewWarningDays, setRenewWarningDays] = useState(3);
 
   const openAddModal = () => {
     setEditingSystem(null);
@@ -77,6 +79,8 @@ export default function Dashboard({
     setRenewingSystem(sys);
     setRenewEndDate(new Date(sys.subscriptionEndDate).toISOString().split("T")[0]);
     setRenewRecordPayment(true);
+    setRenewGracePeriodDays(sys.gracePeriodDays);
+    setRenewWarningDays(sys.warningDays || 3);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -114,6 +118,8 @@ export default function Dashboard({
     await renewSystem(renewingSystem.id, {
       subscriptionEndDate: renewEndDate,
       recordPayment: renewRecordPayment,
+      gracePeriodDays: renewGracePeriodDays,
+      warningDays: renewWarningDays,
     });
     setRenewingSystem(null);
     window.location.reload();
@@ -300,7 +306,7 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Restricted renewal modal — staff (no pricing shown, no other fields editable) */}
+      {/* Restricted renewal modal — staff (no pricing shown) */}
       {renewingSystem && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -313,6 +319,16 @@ export default function Dashboard({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">تاريخ الانتهاء الجديد</label>
                 <input required type="date" value={renewEndDate} onChange={e => setRenewEndDate(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">فترة السماح (بالأيام)</label>
+                <input required type="number" min={0} value={renewGracePeriodDays} onChange={e => setRenewGracePeriodDays(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">تنبيه قبل الانتهاء بـ (بالأيام)</label>
+                <input required type="number" min={0} value={renewWarningDays} onChange={e => setRenewWarningDays(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
               </div>
 
               <label className="flex items-center gap-3 cursor-pointer select-none p-3 bg-green-50 rounded-lg border border-green-100">
