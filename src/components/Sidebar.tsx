@@ -43,7 +43,10 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Header & Hamburger Menu */}
-      <div className="lg:hidden bg-white border-b border-gray-200 flex items-center justify-between p-4 sticky top-0 z-20">
+      <div
+        className="lg:hidden bg-white border-b border-gray-200 flex items-center justify-between p-4 sticky top-0 z-20"
+        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+      >
         <div className="flex items-center gap-2">
           <Image src="/icons/icon-192.png" alt="OpenAppo Admin" width={40} height={40} className="w-10 h-10 rounded-lg" priority />
           <span className="font-bold text-gray-800">OpenAppo</span>
@@ -72,7 +75,7 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 right-0 z-40 w-64 bg-white border-l border-gray-200 h-screen flex flex-col font-sans dir-rtl transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-0 right-0 z-40 w-64 bg-white border-l border-gray-200 h-dvh lg:h-screen flex flex-col font-sans dir-rtl transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
@@ -99,7 +102,10 @@ export function Sidebar() {
             </Link>
           ))}
         </div>
-        <div className="p-4 border-t border-gray-200 flex flex-col gap-2">
+        <div
+          className="p-4 border-t border-gray-200 flex flex-col gap-2"
+          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        >
           <InstallPWAButton />
           <PushSubscribeButton />
           <button
