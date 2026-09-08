@@ -14,7 +14,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(iso).toLocaleDateString("ar-EG-u-nu-latn", { day: "numeric", month: "long", year: "numeric" });
 }
 
 export default function ReportsDashboard({
@@ -95,20 +95,20 @@ export default function ReportsDashboard({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 font-medium mb-2">اشتراكات شهرية</p>
-          <p className="text-2xl font-bold text-blue-600">{report.subscriptionTotal.toLocaleString("ar-EG")} <span className="text-sm">ج.م</span></p>
+          <p className="text-2xl font-bold text-blue-600">{report.subscriptionTotal.toLocaleString("en-US")}</p>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 font-medium mb-2">مبالغ تأسيس</p>
-          <p className="text-2xl font-bold text-purple-600">{report.setupFeeTotal.toLocaleString("ar-EG")} <span className="text-sm">ج.م</span></p>
+          <p className="text-2xl font-bold text-purple-600">{report.setupFeeTotal.toLocaleString("en-US")}</p>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 font-medium mb-2">إجمالي المصروفات</p>
-          <p className="text-2xl font-bold text-red-500">{report.expensesTotal.toLocaleString("ar-EG")} <span className="text-sm">ج.م</span></p>
+          <p className="text-2xl font-bold text-red-500">{report.expensesTotal.toLocaleString("en-US")}</p>
         </div>
         <div className={`rounded-2xl p-5 shadow-sm border ${report.netProfit >= 0 ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
           <p className="text-xs text-gray-500 font-medium mb-2">صافي الربح</p>
           <p className={`text-2xl font-bold ${report.netProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-            {report.netProfit >= 0 ? "+" : ""}{report.netProfit.toLocaleString("ar-EG")} <span className="text-sm">ج.م</span>
+            {report.netProfit >= 0 ? "+" : ""}{report.netProfit.toLocaleString("en-US")}
           </p>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function ReportsDashboard({
             {report.expensesByCategory.map((c) => (
               <div key={c.category} className="flex justify-between text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-600">{CATEGORY_LABELS[c.category] || c.category}</span>
-                <span className="font-semibold text-gray-900">{c.total.toLocaleString("ar-EG")} ج.م</span>
+                <span className="font-semibold text-gray-900">{c.total.toLocaleString("en-US")}</span>
               </div>
             ))}
           </div>
@@ -170,7 +170,7 @@ export default function ReportsDashboard({
                           {p.type === "setup" ? "تأسيس" : "اشتراك"}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 font-semibold text-green-700">{p.amount.toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3.5 font-semibold text-green-700">{p.amount.toLocaleString("en-US")}</td>
                       <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(p.paidAt)}</td>
                     </tr>
                   ))}
@@ -215,7 +215,7 @@ export default function ReportsDashboard({
                           {CATEGORY_LABELS[e.category] || e.category}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 font-semibold text-red-600">{e.amount.toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3.5 font-semibold text-red-600">{e.amount.toLocaleString("en-US")}</td>
                       <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(e.paidAt)}</td>
                       <td className="px-5 py-3.5 text-gray-400 text-sm max-w-[200px] truncate">{e.note || "—"}</td>
                     </tr>

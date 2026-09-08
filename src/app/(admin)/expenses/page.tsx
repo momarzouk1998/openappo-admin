@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ensureDbTables } from "@/lib/prisma";
-import { getExpenses, getExpenseStats } from "@/app/actions";
+import { getExpenses } from "@/app/actions";
 import ExpensesDashboard from "@/components/ExpensesDashboard";
 import { getCurrentAdmin } from "@/lib/session";
 import { firstAllowedPage } from "@/lib/pages";
@@ -15,22 +15,7 @@ export default async function ExpensesPage() {
 
   await ensureDbTables();
 
-  const [expenses, stats] = await Promise.all([
-    getExpenses(),
-    getExpenseStats(),
-  ]);
+  const expenses = await getExpenses();
 
-  const now = new Date();
-  const currentMonthLabel = now.toLocaleDateString("ar-EG", {
-    month: "long",
-    year: "numeric",
-  });
-
-  return (
-    <ExpensesDashboard
-      initialExpenses={expenses}
-      stats={stats}
-      currentMonthLabel={currentMonthLabel}
-    />
-  );
+  return <ExpensesDashboard initialExpenses={expenses} />;
 }

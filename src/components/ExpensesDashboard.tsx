@@ -6,7 +6,6 @@ import {
   updateExpense,
   deleteExpense,
   type ExpenseRow,
-  type ExpenseStats,
 } from "@/app/actions";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 
@@ -14,8 +13,6 @@ import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
 
 type Props = {
   initialExpenses: ExpenseRow[];
-  stats: ExpenseStats;
-  currentMonthLabel: string;
 };
 
 const MONTHS_AR = [
@@ -24,7 +21,7 @@ const MONTHS_AR = [
 ];
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ar-EG", {
+  return new Date(iso).toLocaleDateString("ar-EG-u-nu-latn", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -42,11 +39,8 @@ type ModalMode = "add" | "edit" | null;
 
 export default function ExpensesDashboard({
   initialExpenses,
-  stats,
-  currentMonthLabel,
 }: Props) {
   const [expenses]        = useState<ExpenseRow[]>(initialExpenses);
-  const [liveStats]       = useState<ExpenseStats>(stats);
 
   // ── Filters ───────────────────────────────────────────────────────────────
   const [filterMonth,    setFilterMonth]    = useState("");
@@ -121,47 +115,6 @@ export default function ExpensesDashboard({
     <div className="p-6 md:p-8 max-w-7xl mx-auto font-sans" dir="rtl">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">💸 المصروفات</h1>
 
-      {/* ── Stats Row ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
-
-        {/* Total expenses this month */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-xl">💸</div>
-            <p className="text-sm font-medium text-gray-500">مصروفات — {currentMonthLabel}</p>
-          </div>
-          <p className="text-3xl font-bold text-red-500">
-            {liveStats.currentMonthTotal.toLocaleString("ar-EG")} ج.م
-          </p>
-          <p className="text-xs text-gray-400 mt-1">{liveStats.currentMonthCount} عملية هذا الشهر</p>
-        </div>
-
-        {/* By category breakdown */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-xl">🗂️</div>
-            <p className="text-sm font-medium text-gray-500">توزيع المصروفات</p>
-          </div>
-          {liveStats.byCategory.length === 0 ? (
-            <p className="text-sm text-gray-400">لا مصروفات هذا الشهر</p>
-          ) : (
-            <ul className="space-y-1 max-h-24 overflow-y-auto">
-              {liveStats.byCategory
-                .sort((a, b) => b.total - a.total)
-                .map(({ category, total }) => {
-                  const meta = categoryMeta(category);
-                  return (
-                    <li key={category} className="flex justify-between text-sm">
-                      <span className="text-gray-600">{meta.icon} {meta.label}</span>
-                      <span className="font-semibold text-gray-800">{total.toLocaleString()} ج.م</span>
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
-        </div>
-      </div>
-
       {/* ── Filters + Add ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <button
@@ -200,7 +153,7 @@ export default function ExpensesDashboard({
 
         {(filterMonth || filterCategory) && (
           <span className="text-sm text-gray-500">
-            إجمالي: <strong className="text-gray-800">{filteredTotal.toLocaleString("ar-EG")} ج.م</strong>
+            إجمالي: <strong className="text-gray-800">{filteredTotal.toLocaleString("en-US")}</strong>
             <span className="text-gray-400"> ({filtered.length} عملية)</span>
           </span>
         )}
@@ -241,7 +194,7 @@ export default function ExpensesDashboard({
                       <td className="px-5 py-4 font-medium text-gray-900">{e.label}</td>
                       <td className="px-5 py-4">
                         <span className="inline-block bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-sm">
-                          {e.amount.toLocaleString("ar-EG")} ج.م
+                          {e.amount.toLocaleString("en-US")}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-gray-600 text-sm">{formatDate(e.paidAt)}</td>
@@ -319,7 +272,7 @@ export default function ExpensesDashboard({
 
               {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ (ج.م)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ</label>
                 <input
                   required
                   type="number"

@@ -6,7 +6,6 @@ import {
   updatePayment,
   deletePayment,
   type PaymentRow,
-  type PaymentStats,
 } from "@/app/actions";
 
 import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
@@ -15,10 +14,7 @@ type SystemOption = { id: string; displayName: string; monthlyFee: number };
 
 type Props = {
   initialPayments: PaymentRow[];
-  stats: PaymentStats;
   systems: SystemOption[];
-  currentMonthLabel: string;
-  nextMonthLabel: string;
 };
 
 const MONTHS_AR = [
@@ -28,20 +24,16 @@ const MONTHS_AR = [
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" });
+  return d.toLocaleDateString("ar-EG-u-nu-latn", { day: "numeric", month: "long", year: "numeric" });
 }
 
 type ModalMode = "add" | "edit" | null;
 
 export default function PaymentsDashboard({
   initialPayments,
-  stats,
   systems,
-  currentMonthLabel,
-  nextMonthLabel,
 }: Props) {
   const [payments, setPayments] = useState<PaymentRow[]>(initialPayments);
-  const [liveStats, setLiveStats] = useState<PaymentStats>(stats);
 
   // ── Filter state ─────────────────────────────────────────────────────────
   const [filterMonth, setFilterMonth] = useState<string>(""); // "YYYY-MM" or ""
@@ -157,51 +149,6 @@ export default function PaymentsDashboard({
     <div className="p-6 md:p-8 max-w-7xl mx-auto font-sans" dir="rtl">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">💳 سجل المدفوعات</h1>
 
-      {/* ── Stats Cards ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-        {/* Current month */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-xl">✅</div>
-            <p className="text-sm font-medium text-gray-500">تم تحصيله — {currentMonthLabel}</p>
-          </div>
-          <p className="text-3xl font-bold text-green-600">{liveStats.currentMonthTotal.toLocaleString("ar-EG")} ج.م</p>
-          <p className="text-xs text-gray-400 mt-1">{liveStats.currentMonthCount} دفعة مسجلة هذا الشهر</p>
-        </div>
-
-        {/* Next month forecast */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl">📅</div>
-            <p className="text-sm font-medium text-gray-500">متوقع — {nextMonthLabel}</p>
-          </div>
-          <p className="text-3xl font-bold text-blue-600">{liveStats.nextMonthForecast.toLocaleString("ar-EG")} ج.م</p>
-          <p className="text-xs text-gray-400 mt-1">
-            {liveStats.nextMonthSystems.length} عميل لم يسدد بعد الشهر القادم
-          </p>
-        </div>
-
-        {/* Next month breakdown */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center text-xl">🔔</div>
-            <p className="text-sm font-medium text-gray-500">العملاء المتوقعون الشهر القادم</p>
-          </div>
-          {liveStats.nextMonthSystems.length === 0 ? (
-            <p className="text-sm text-gray-400">الكل سدد بالفعل 🎉</p>
-          ) : (
-            <ul className="space-y-1 max-h-28 overflow-y-auto">
-              {liveStats.nextMonthSystems.map((s) => (
-                <li key={s.id} className="flex justify-between text-sm">
-                  <span className="text-gray-700 truncate min-w-0">{s.displayName}</span>
-                  <span className="font-semibold text-orange-600 shrink-0 mr-2">{s.monthlyFee.toLocaleString()} ج.م</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
       {/* ── Filters + Add button ──────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <button
@@ -240,7 +187,7 @@ export default function PaymentsDashboard({
 
         {(filterMonth || filterSystem) && (
           <span className="text-sm text-gray-500">
-            إجمالي الفلتر: <strong className="text-gray-800">{filteredTotal.toLocaleString("ar-EG")} ج.م</strong>
+            إجمالي الفلتر: <strong className="text-gray-800">{filteredTotal.toLocaleString("en-US")}</strong>
             <span className="text-gray-400"> ({filtered.length} دفعة)</span>
           </span>
         )}
@@ -280,7 +227,7 @@ export default function PaymentsDashboard({
                     </td>
                     <td className="px-5 py-4">
                       <span className="inline-block bg-green-50 text-green-700 font-bold px-3 py-1 rounded-full text-sm">
-                        {p.amount.toLocaleString("ar-EG")} ج.م
+                        {p.amount.toLocaleString("en-US")}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-gray-600 text-sm">{formatDate(p.paidAt)}</td>
@@ -365,7 +312,7 @@ export default function PaymentsDashboard({
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ (ج.م)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ</label>
                 <input
                   required
                   type="number"

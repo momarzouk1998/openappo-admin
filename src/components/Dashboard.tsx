@@ -166,12 +166,12 @@ export default function Dashboard({
                 {canSeePricing && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">الاشتراك الشهري:</span>
-                    <span className="font-semibold text-gray-900">{sys.monthlyFee} ج.م</span>
+                    <span className="font-semibold text-gray-900">{sys.monthlyFee.toLocaleString("en-US")}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">تاريخ الانتهاء:</span>
-                  <span className="font-semibold text-gray-900">{endDate.toLocaleDateString("ar-EG")}</span>
+                  <span className="font-semibold text-gray-900">{endDate.toLocaleDateString("ar-EG-u-nu-latn")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">فترة السماح:</span>
@@ -288,7 +288,7 @@ export default function Dashboard({
                   />
                   <div>
                     <span className="text-sm font-semibold text-green-800">تسجيل دفعة تلقائياً عند التجديد</span>
-                    <p className="text-xs text-green-600 mt-0.5">سيُضاف مبلغ {monthlyFee} ج.م بتاريخ {subscriptionEndDate} في سجل المدفوعات</p>
+                    <p className="text-xs text-green-600 mt-0.5">سيُضاف مبلغ {monthlyFee.toLocaleString("en-US")} بتاريخ {subscriptionEndDate} في سجل المدفوعات</p>
                   </div>
                 </label>
               )}

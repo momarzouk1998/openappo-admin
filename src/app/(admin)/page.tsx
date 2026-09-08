@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma, ensureDbTables } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/session";
 import { firstAllowedPage } from "@/lib/pages";
+import { getPaymentStats } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,12 @@ export default async function StatsPage() {
   let systems: any[] = [];
   let currentMonthCollected = 0;
   let currentMonthExpenses  = 0;
+  let paymentStats: Awaited<ReturnType<typeof getPaymentStats>> = {
+    currentMonthTotal: 0,
+    currentMonthCount: 0,
+    nextMonthForecast: 0,
+    nextMonthSystems: [],
+  };
 
   try {
     await ensureDbTables();
@@ -66,13 +73,18 @@ export default async function StatsPage() {
     systems = rawSystems;
     currentMonthCollected = monthPayments.reduce((s, p) => s + p.amount, 0);
     currentMonthExpenses  = monthExpensesRows.reduce((s, e) => s + e.amount, 0);
+    paymentStats = await getPaymentStats();
   } catch (error) {
     console.error("Failed to fetch systems in StatsPage:", error);
   }
 
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const currentMonthLabel = now.toLocaleDateString("ar-EG", { month: "long", year: "numeric" });
+  const currentMonthLabel = now.toLocaleDateString("ar-EG-u-nu-latn", { month: "long", year: "numeric" });
+  const nextMonthLabel = new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleDateString(
+    "ar-EG-u-nu-latn",
+    { month: "long", year: "numeric" }
+  );
 
   let totalSystems        = systems.length;
   let activeSystems       = 0;
@@ -119,7 +131,7 @@ export default async function StatsPage() {
         />
         <StatCard icon="💡" iconBg="bg-orange-50" iconColor="text-orange-500"
           label="الإيرادات المتوقعة شهرياً"
-          value={`${totalExpectedRevenue.toLocaleString("ar-EG")} ج.م`}
+          value={totalExpectedRevenue.toLocaleString("en-US")}
           valueColor="text-orange-500"
         />
       </div>
@@ -138,8 +150,7 @@ export default async function StatsPage() {
             </div>
           </div>
           <p className="text-3xl font-extrabold text-green-600">
-            {currentMonthCollected.toLocaleString("ar-EG")}
-            <span className="text-base font-semibold text-green-500 mr-1">ج.م</span>
+            {currentMonthCollected.toLocaleString("en-US")}
           </p>
           {totalExpectedRevenue > 0 && (
             <div className="mt-3">
@@ -169,8 +180,7 @@ export default async function StatsPage() {
             </div>
           </div>
           <p className="text-3xl font-extrabold text-red-500">
-            {currentMonthExpenses.toLocaleString("ar-EG")}
-            <span className="text-base font-semibold text-red-400 mr-1">ج.م</span>
+            {currentMonthExpenses.toLocaleString("en-US")}
           </p>
           {currentMonthCollected > 0 && (
             <div className="mt-3">
@@ -201,13 +211,45 @@ export default async function StatsPage() {
           </div>
           <p className={`text-3xl font-extrabold ${netProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
             {netProfit >= 0 ? "+" : ""}
-            {netProfit.toLocaleString("ar-EG")}
-            <span className={`text-base font-semibold mr-1 ${netProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>ج.م</span>
+            {netProfit.toLocaleString("en-US")}
           </p>
           <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-            محصّل {currentMonthCollected.toLocaleString("ar-EG")} −&nbsp;
-            مصروفات {currentMonthExpenses.toLocaleString("ar-EG")}
+            محصّل {currentMonthCollected.toLocaleString("en-US")} −&nbsp;
+            مصروفات {currentMonthExpenses.toLocaleString("en-US")}
           </p>
+        </div>
+      </div>
+
+      {/* ── Row 3: Next month forecast (moved from Payments page) ──────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl">📅</div>
+            <p className="text-sm font-medium text-gray-500">متوقع — {nextMonthLabel}</p>
+          </div>
+          <p className="text-3xl font-bold text-blue-600">{paymentStats.nextMonthForecast.toLocaleString("en-US")}</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {paymentStats.nextMonthSystems.length.toLocaleString("en-US")} عميل لم يسدد بعد الشهر القادم
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center text-xl">🔔</div>
+            <p className="text-sm font-medium text-gray-500">العملاء المتوقعون الشهر القادم</p>
+          </div>
+          {paymentStats.nextMonthSystems.length === 0 ? (
+            <p className="text-sm text-gray-400">الكل سدد بالفعل 🎉</p>
+          ) : (
+            <ul className="space-y-1 max-h-28 overflow-y-auto">
+              {paymentStats.nextMonthSystems.map((s) => (
+                <li key={s.id} className="flex justify-between text-sm">
+                  <span className="text-gray-700 truncate min-w-0">{s.displayName}</span>
+                  <span className="font-semibold text-orange-600 shrink-0 mr-2">{s.monthlyFee.toLocaleString("en-US")}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
@@ -239,9 +281,9 @@ export default async function StatsPage() {
                     <td className="py-4 font-medium text-gray-900">{sys.displayName}</td>
                     <td className="py-4 text-gray-400 font-mono text-sm">{sys.name}</td>
                     <td className="py-4 text-red-600 font-medium text-sm">
-                      {new Date(sys.subscriptionEndDate).toLocaleDateString("ar-EG")}
+                      {new Date(sys.subscriptionEndDate).toLocaleDateString("ar-EG-u-nu-latn")}
                     </td>
-                    <td className="py-4 text-gray-900 font-semibold">{sys.monthlyFee} ج.م</td>
+                    <td className="py-4 text-gray-900 font-semibold">{sys.monthlyFee.toLocaleString("en-US")}</td>
                   </tr>
                 ))}
               </tbody>
