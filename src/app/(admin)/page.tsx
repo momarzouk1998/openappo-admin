@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
 import { prisma, ensureDbTables } from "@/lib/prisma";
-import { getMonthlyChartData } from "@/app/actions";
-import { AnalyticsCharts } from "@/components/AnalyticsCharts";
 import { getCurrentAdmin } from "@/lib/session";
 import { firstAllowedPage } from "@/lib/pages";
 
@@ -16,7 +14,6 @@ export default async function StatsPage() {
   let systems: any[] = [];
   let currentMonthCollected = 0;
   let currentMonthExpenses  = 0;
-  let monthlyChartData: Awaited<ReturnType<typeof getMonthlyChartData>> = [];
 
   try {
     await ensureDbTables();
@@ -65,7 +62,6 @@ export default async function StatsPage() {
       prisma.payment.findMany({ where: { paidAt: { gte: monthStart, lte: monthEnd } } }),
       prisma.expense.findMany({ where: { paidAt: { gte: monthStart, lte: monthEnd } } }),
     ]);
-    monthlyChartData = await getMonthlyChartData(6);
 
     systems = rawSystems;
     currentMonthCollected = monthPayments.reduce((s, p) => s + p.amount, 0);
@@ -214,13 +210,6 @@ export default async function StatsPage() {
           </p>
         </div>
       </div>
-
-      {/* ── Charts ──────────────────────────────────────────────────────────── */}
-      <AnalyticsCharts
-        monthly={monthlyChartData}
-        activeSystems={activeSystems}
-        inactiveSystems={inactiveSystems}
-      />
 
       {/* ── Expiring soon table ─────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

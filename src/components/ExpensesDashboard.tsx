@@ -117,16 +117,12 @@ export default function ExpensesDashboard({
     finally { setSaving(false); setDeleteConfirmId(null); }
   };
 
-  // ── Net profit color ──────────────────────────────────────────────────────
-  const profitColor = liveStats.netProfit >= 0 ? "text-green-600" : "text-red-600";
-  const profitBg    = liveStats.netProfit >= 0 ? "bg-green-50"    : "bg-red-50";
-
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto font-sans" dir="rtl">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">💸 المصروفات</h1>
 
       {/* ── Stats Row ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
 
         {/* Total expenses this month */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -138,31 +134,6 @@ export default function ExpensesDashboard({
             {liveStats.currentMonthTotal.toLocaleString("ar-EG")} ج.م
           </p>
           <p className="text-xs text-gray-400 mt-1">{liveStats.currentMonthCount} عملية هذا الشهر</p>
-        </div>
-
-        {/* Revenue */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-xl">💰</div>
-            <p className="text-sm font-medium text-gray-500">إيرادات — {currentMonthLabel}</p>
-          </div>
-          <p className="text-3xl font-bold text-green-600">
-            {liveStats.currentMonthRevenue.toLocaleString("ar-EG")} ج.م
-          </p>
-        </div>
-
-        {/* Net profit */}
-        <div className={`rounded-2xl p-6 shadow-sm border border-gray-100 ${profitBg}`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${liveStats.netProfit >= 0 ? "bg-green-100" : "bg-red-100"}`}>
-              {liveStats.netProfit >= 0 ? "📈" : "📉"}
-            </div>
-            <p className="text-sm font-medium text-gray-500">صافي الربح — {currentMonthLabel}</p>
-          </div>
-          <p className={`text-3xl font-bold ${profitColor}`}>
-            {liveStats.netProfit >= 0 ? "+" : ""}{liveStats.netProfit.toLocaleString("ar-EG")} ج.م
-          </p>
-          <p className="text-xs text-gray-400 mt-1">إيرادات − مصروفات</p>
         </div>
 
         {/* By category breakdown */}
