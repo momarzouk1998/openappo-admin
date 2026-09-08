@@ -16,6 +16,9 @@ const ALL_LINKS = [
   { href: "/settings",  label: "إعدادات الحساب", icon: "⚙️" },
 ];
 
+// Quick-access shortcut for the mobile bottom bar — max 4 items, chosen by the user.
+const BOTTOM_NAV_HREFS = ["/", "/systems", "/payments", "/expenses"];
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -39,6 +42,10 @@ export function Sidebar() {
     router.push("/login");
     router.refresh();
   };
+
+  const bottomNavLinks = BOTTOM_NAV_HREFS
+    .map((href) => links.find((l) => l.href === href))
+    .filter((l): l is (typeof ALL_LINKS)[number] => !!l);
 
   return (
     <>
@@ -117,6 +124,25 @@ export function Sidebar() {
           </button>
         </div>
       </aside>
+
+      {/* Bottom quick-access bar — mobile only */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 flex items-stretch"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {bottomNavLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors ${
+              pathname === link.href ? "text-blue-700 font-semibold" : "text-gray-500"
+            }`}
+          >
+            <span className="text-xl">{link.icon}</span>
+            <span>{link.label}</span>
+          </Link>
+        ))}
+      </nav>
     </>
   );
 }
