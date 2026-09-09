@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/login') ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/public/') ||
     pathname.startsWith('/api/subscription/verify') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons/') ||
@@ -34,5 +35,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api/subscription/verify|_next/static|_next/image|icons/|favicon|logo\\.png|manifest\\.json|sw\\.js|og-image\\.png|apple-touch-icon\\.png).*)'],
+  matcher: ['/((?!api/public/|api/subscription/verify|_next/static|_next/image|icons/|favicon|logo\\.png|manifest\\.json|sw\\.js|og-image\\.png|apple-touch-icon\\.png).*)'],
 };

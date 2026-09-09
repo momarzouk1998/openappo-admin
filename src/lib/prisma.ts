@@ -127,6 +127,23 @@ export async function ensureDbTables() {
       );
     `);
 
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS PortfolioProject (
+        id TEXT PRIMARY KEY,
+        slug TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL DEFAULT '',
+        subtitle TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        youtubeId TEXT NOT NULL DEFAULT '',
+        logoUrl TEXT NOT NULL DEFAULT '',
+        shots TEXT NOT NULL DEFAULT '[]',
+        orderIndex INTEGER NOT NULL DEFAULT 0,
+        isPublished INTEGER NOT NULL DEFAULT 0,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     dbTablesEnsured = true;
   } catch (error) {
     console.error("Error ensuring DB tables exist:", error);

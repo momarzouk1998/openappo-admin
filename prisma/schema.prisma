@@ -62,3 +62,20 @@ model Expense {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Drives the openappo.com "سابقة الأعمال" (/portfolio) page. On every change the
+// admin writes a portfolio.json manifest to Cloudflare R2, which the site reads.
+model PortfolioProject {
+  id          String   @id @default(uuid())
+  slug        String   @unique // used in R2 keys + as the manifest key
+  name        String
+  subtitle    String   @default("")
+  description String   @default("")
+  youtubeId   String   @default("") // 11-char YouTube id, embedded above the shots
+  logoUrl     String   @default("") // R2 public URL
+  shots       String   @default("[]") // JSON array of R2 public URLs, in display order
+  orderIndex  Int      @default(0)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
