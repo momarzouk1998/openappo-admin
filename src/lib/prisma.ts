@@ -12,7 +12,14 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
+let dbTablesEnsured = false;
+
 export async function ensureDbTables() {
+  // This runs 14 CREATE/ALTER statements — expensive on every request and
+  // pointless after the first successful run in this server process, since
+  // the schema doesn't change while the process is alive.
+  if (dbTablesEnsured) return;
+
   try {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS System (
@@ -119,6 +126,8 @@ export async function ensureDbTables() {
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    dbTablesEnsured = true;
   } catch (error) {
     console.error("Error ensuring DB tables exist:", error);
   }

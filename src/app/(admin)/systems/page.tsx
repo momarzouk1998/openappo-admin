@@ -19,44 +19,6 @@ export default async function Page() {
   try {
     await ensureDbTables();
 
-    const defaultSystems = [
-      {
-        id: "10000000-0000-0000-0000-000000000001",
-        name: "elnazlawy-system",
-        displayName: "معرض النزلاوي",
-        monthlyFee: 750,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      },
-      {
-        id: "10000000-0000-0000-0000-000000000002",
-        name: "mazaya-system",
-        displayName: "مزايا للأثاث",
-        monthlyFee: 750,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      },
-      {
-        id: "10000000-0000-0000-0000-000000000003",
-        name: "Rtx",
-        displayName: "RTX للتجارة",
-        monthlyFee: 700,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      }
-    ];
-
-    for (const sys of defaultSystems) {
-      await prisma.system.upsert({
-        where: { name: sys.name },
-        update: {},
-        create: sys,
-      });
-    }
-
     const rawSystems = await prisma.system.findMany({
       orderBy: { createdAt: 'asc' }
     });

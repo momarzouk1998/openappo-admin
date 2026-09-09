@@ -25,41 +25,6 @@ export default async function StatsPage() {
   try {
     await ensureDbTables();
 
-    const defaultSystems = [
-      {
-        name: "elnazlawy-system",
-        displayName: "معرض النزلاوي",
-        monthlyFee: 750,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      },
-      {
-        name: "mazaya-system",
-        displayName: "مزايا للأثاث",
-        monthlyFee: 750,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      },
-      {
-        name: "Rtx",
-        displayName: "RTX للتجارة",
-        monthlyFee: 700,
-        subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        gracePeriodDays: 3,
-        warningDays: 3,
-      },
-    ];
-
-    for (const sys of defaultSystems) {
-      await prisma.system.upsert({
-        where: { name: sys.name },
-        update: {},
-        create: sys,
-      });
-    }
-
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
