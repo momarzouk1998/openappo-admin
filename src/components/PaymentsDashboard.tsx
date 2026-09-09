@@ -8,7 +8,7 @@ import {
   type PaymentRow,
 } from "@/app/actions";
 
-import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
+import { todayStr, formatDateToYYYYMMDD, currentYearMonth } from "@/lib/dates";
 
 type SystemOption = { id: string; displayName: string; monthlyFee: number };
 
@@ -36,7 +36,7 @@ export default function PaymentsDashboard({
   const [payments, setPayments] = useState<PaymentRow[]>(initialPayments);
 
   // ── Filter state ─────────────────────────────────────────────────────────
-  const [filterMonth, setFilterMonth] = useState<string>(""); // "YYYY-MM" or ""
+  const [filterMonth, setFilterMonth] = useState<string>(currentYearMonth()); // "YYYY-MM" or ""
   const [filterSystem, setFilterSystem] = useState<string>("");
 
   // ── Modal state ──────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ export default function PaymentsDashboard({
 
   // ── Available months from data ────────────────────────────────────────────
   const monthOptions = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Set<string>([currentYearMonth()]);
     payments.forEach((p) => {
       set.add(formatDateToYYYYMMDD(new Date(p.paidAt)).slice(0, 7));
     });

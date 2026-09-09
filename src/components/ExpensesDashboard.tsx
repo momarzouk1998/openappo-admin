@@ -9,7 +9,7 @@ import {
 } from "@/app/actions";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 
-import { todayStr, formatDateToYYYYMMDD } from "@/lib/dates";
+import { todayStr, formatDateToYYYYMMDD, currentYearMonth } from "@/lib/dates";
 
 type Props = {
   initialExpenses: ExpenseRow[];
@@ -43,7 +43,7 @@ export default function ExpensesDashboard({
   const [expenses]        = useState<ExpenseRow[]>(initialExpenses);
 
   // ── Filters ───────────────────────────────────────────────────────────────
-  const [filterMonth,    setFilterMonth]    = useState("");
+  const [filterMonth,    setFilterMonth]    = useState(currentYearMonth());
   const [filterCategory, setFilterCategory] = useState("");
 
   // ── Modal ─────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ export default function ExpensesDashboard({
   );
 
   const monthOptions = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Set<string>([currentYearMonth()]);
     expenses.forEach((e) => {
       set.add(formatDateToYYYYMMDD(new Date(e.paidAt)).slice(0, 7));
     });

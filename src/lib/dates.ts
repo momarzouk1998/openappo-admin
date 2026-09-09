@@ -14,6 +14,11 @@ export function todayStr(): string {
   return formatDateToYYYYMMDD(new Date());
 }
 
+export function currentYearMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export function currentMonthRange(): { from: string; to: string } {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
