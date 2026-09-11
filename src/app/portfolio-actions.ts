@@ -18,7 +18,7 @@ import {
   putObject,
   r2Configured,
 } from "@/lib/r2";
-import { LEGACY_PROJECTS } from "@/lib/portfolio-data";
+import { PORTFOLIO_SEED } from "@/lib/portfolio-data";
 
 async function requireOwner() {
   const admin = await getCurrentAdmin();
@@ -240,7 +240,7 @@ export async function deletePortfolioProject(id: string) {
   return republish();
 }
 
-/** One-time: seed rows for the 9 systems from the old hard-coded list. */
+/** Seed rows for any system in PORTFOLIO_SEED that has no row yet. */
 export async function seedLegacyPortfolio() {
   await requireOwner();
   await ensureDbTables();
@@ -251,8 +251,8 @@ export async function seedLegacyPortfolio() {
   const have = new Set(existing.map((e) => e.slug));
 
   let created = 0;
-  for (let i = 0; i < LEGACY_PROJECTS.length; i++) {
-    const p = LEGACY_PROJECTS[i];
+  for (let i = 0; i < PORTFOLIO_SEED.length; i++) {
+    const p = PORTFOLIO_SEED[i];
     if (have.has(p.slug)) continue;
     await prisma.portfolioProject.create({
       data: {
